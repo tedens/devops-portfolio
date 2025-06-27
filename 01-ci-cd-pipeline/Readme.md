@@ -11,3 +11,4 @@ Run locally:
 ```bash
 docker-compose up --build
 ```
+![CI Workflow Screenshot](../screenshots/01-ci-cd-pipeline/01.png)
