@@ -10,19 +10,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Set working directory
-        run: cd 01-ci-cd-pipeline
-        
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+        working-directory: 01-ci-cd-pipeline
 
       - name: Run tests
         run: npm test
+        working-directory: 01-ci-cd-pipeline
 
       - name: Build Docker image
         run: docker build -t ci-cd-demo:latest .
+        working-directory: 01-ci-cd-pipeline
+
