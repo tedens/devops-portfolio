@@ -16,5 +16,12 @@ spec:
       - name: k8s-demo
         image: k8s-demo-app:latest
         imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
         ports:
         - containerPort: 3000
