@@ -16,10 +16,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run tests
         run: npm test
 
       - name: Build Docker image
-        run: docker build -t myapp:latest .
+        run: docker build -t ci-cd-demo:latest .
