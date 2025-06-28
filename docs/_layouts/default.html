@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ page.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 2rem;
+        line-height: 1.6;
+      }
+
+      a {
+        color: #90caf9;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      h1, h2, h3 {
+        color: #ffffff;
+      }
+
+      ul {
+        padding-left: 1.5em;
+      }
+
+      code {
+        background-color: #1e1e1e;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-size: 90%;
+      }
+
+      pre {
+        background-color: #1e1e1e;
+        padding: 1em;
+        overflow: auto;
+        border-radius: 6px;
+      }
+
+      header, footer {
+        margin-bottom: 2rem;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {% unless page.hide_title %}
+        <header>
+          <h1>{{ site.title }}</h1>
+        </header>
+      {% endunless %}
+      <main>
+        {{ content }}
+      </main>
+    </div>
+  </body>
+</html>

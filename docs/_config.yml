@@ -1,7 +1,23 @@
-title: ""
-description: ""
-baseurl: ""
+title: "Anthony Edens – DevOps Portfolio"
+description: "DevOps projects in CI/CD, Kubernetes, IaC, and Monitoring by Anthony Edens"
+baseurl: "" 
 url: "https://tedens.github.io"
-remote_theme: riggraz/no-style-please
+
+theme: null
+markdown: kramdown
+highlighter: rouge
+
 plugins:
-  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: "default"

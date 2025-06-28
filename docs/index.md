@@ -1,6 +1,6 @@
 # Welcome!
 
-I'm a DevOps Manager with over 7 years of experience in automation, infrastructure, and engineering leadership—and more than a decade of backend development and systems administration before that.
+My name is Anthony Edens, and I am a DevOps Manager with over 7 years of experience in automation, infrastructure, and engineering leadership—and more than a decade of backend development and systems administration before that.
 
 I currently take on the following responsibilites at a HealthCare SaaS:
 - Architect and maintain Kubernetes clusters with >99.995% uptime
