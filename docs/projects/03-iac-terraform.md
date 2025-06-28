@@ -22,5 +22,5 @@ This project provisions AWS infrastructure using Terraform with modular best pra
 - `main.tf`, `variables.tf`, `outputs.tf`
 - `modules/ec2-instance/`
 
-### 🔗 [View on GitHub](https://github.com/yourusername/devops-portfolio/tree/main/03-iac-terraform)
+### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/03-iac-terraform)
 ```

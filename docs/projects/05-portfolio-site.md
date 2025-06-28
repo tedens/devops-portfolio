@@ -25,4 +25,4 @@ This project is a static site built with Jekyll and hosted via GitHub Pages to s
 ### 📸 Screenshot
 ![Homepage Preview](../assets/portfolio-home.png)
 
-### 🔗 [View Live](https://yourusername.github.io/portfolio)
+### 🔗 [View Live](https://tedens.github.io/portfolio)

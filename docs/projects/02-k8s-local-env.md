@@ -24,5 +24,5 @@ This project sets up a microservice in Kubernetes using Docker Desktop as the lo
 - `k8s/ingress.yaml`
 - `src/index.js`
 
-### 🔗 [View on GitHub](https://github.com/yourusername/devops-portfolio/tree/main/02-k8s-local-env)
+### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/02-k8s-local-env)
 ```
