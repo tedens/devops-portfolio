@@ -6,7 +6,7 @@ url: "https://tedens.github.io"
 theme: null
 markdown: kramdown
 highlighter: rouge
-
+hide_title: true
 plugins:
   - jekyll-seo-tag
 
