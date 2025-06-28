@@ -1,6 +1,3 @@
----
-
-## 📁 02 - Kubernetes Local Environment (`projects/02-k8s-local-env.md`)
 ```markdown
 ---
 title: "Kubernetes Local Environment with Docker Desktop"

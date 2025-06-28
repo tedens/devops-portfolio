@@ -1,6 +1,3 @@
----
-
-## 📁 03 - Infrastructure as Code (`projects/03-iac-terraform.md`)
 ```markdown
 ---
 title: "Infrastructure as Code (Terraform + AWS)"

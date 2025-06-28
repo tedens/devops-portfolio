@@ -1,6 +1,3 @@
----
-
-## 📁 04 - Monitoring & Logging (`projects/04-monitoring-logging.md`)
 ```markdown
 ---
 title: "Monitoring & Logging Stack with Prometheus, Grafana & Loki"

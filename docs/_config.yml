@@ -2,4 +2,7 @@ title: "Anthony Edens – DevOps Portfolio"
 description: "Projects in CI/CD, Kubernetes, IaC, and Monitoring"
 baseurl: ""
 url: "https://tedens.github.io"
-theme: minima
+remote_theme: riggraz/no-style-please
+plugins:
+  - jekyll-remote-theme
+pages-themes: slate

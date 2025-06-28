@@ -1,4 +1,3 @@
-## 📁 05 - DevOps Portfolio Site (`projects/05-portfolio-site.md`)
 ```markdown
 ---
 title: "DevOps Portfolio Site (Jekyll + GitHub Pages)"
@@ -26,3 +25,4 @@ This project is a static site built with Jekyll and hosted via GitHub Pages to s
 ![Homepage Preview](../assets/portfolio-home.png)
 
 ### 🔗 [View Live](https://tedens.github.io/portfolio)
+```

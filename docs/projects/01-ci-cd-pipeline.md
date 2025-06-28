@@ -1,12 +1,8 @@
----
-
-## 📁 01 - CI/CD Pipeline (`projects/01-ci-cd-pipeline.md`)
 ```markdown
 ---
 title: "CI/CD Pipeline with GitHub Actions"
 layout: page
 ---
-
 This project demonstrates a basic CI/CD workflow using GitHub Actions for a Node.js + Docker application.
 
 ### 🔧 Tools

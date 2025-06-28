@@ -1,13 +1,8 @@
----
-layout: home
-title: "DevOps Portfolio"
----
-
 # Welcome!
 
 I'm **Anthony Edens**, a DevOps Manager with over 7 years of experience in automation, infrastructure, and engineering leadership—and more than a decade of backend development and systems administration before that.
 
-Currently, I manage **six AWS environments** at Claimocity, where I:
+I currently take on the following responsibilites at a HealthCare SaaS:
 - Architect and maintain Kubernetes clusters with >99.995% uptime
 - Run secure CI/CD pipelines that support mobile and web applications
 - Lead cost optimization efforts (saving 60%+ cloud spend)
