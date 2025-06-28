@@ -1,5 +1,7 @@
 title: ""
-description: "DevOps small scale Projects in CI/CD, Kubernetes, IaC, and Monitoring created by Anthony Edens"
+description: ""
 baseurl: ""
 url: "https://tedens.github.io"
-theme: jekyll-theme-slate
+remote_theme: riggraz/no-style-please
+plugins:
+  - jekyll-remote-theme
