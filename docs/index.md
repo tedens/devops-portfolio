@@ -16,7 +16,7 @@ This portfolio showcases just a few of the foundational systems and workflows I�
 ## 🔧 Projects
 - [CI/CD Pipeline](projects/01-ci-cd-pipeline.html) — GitHub Actions + Docker
 - [Kubernetes Local Environment](projects/02-k8s-local-env.html) — Local app deployment using Docker Desktop + K8s
-- [Infrastructure as Code - WIP](projects/03-iac-terraform.html) — AWS provisioning with modular Terraform
+- [Infrastructure as Code (WIP)](projects/03-iac-terraform.html) — AWS provisioning with modular Terraform
 - [Monitoring & Logging](projects/04-monitoring-logging.html) — Prometheus, Grafana, and Loki stack via Docker Compose
 - [Portfolio Site](projects/05-portfolio-site.html) — This site, built with Jekyll and GitHub Pages
 

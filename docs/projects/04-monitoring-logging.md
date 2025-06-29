@@ -1,4 +1,3 @@
-```markdown
 ---
 title: "Monitoring & Logging Stack with Prometheus, Grafana & Loki"
 layout: page
@@ -21,6 +20,3 @@ This project sets up a full local observability stack using Docker Compose.
 - `prometheus.yml`, `datasource.yml`, `dashboards.yml`
 
 ### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/04-monitoring-logging)
-```
-
----

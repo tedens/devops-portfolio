@@ -1,4 +1,3 @@
-```markdown
 ---
 title: "Kubernetes Local Environment with Docker Desktop"
 layout: page
@@ -22,4 +21,3 @@ This project sets up a microservice in Kubernetes using Docker Desktop as the lo
 - `src/index.js`
 
 ### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/02-k8s-local-env)
-```
