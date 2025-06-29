@@ -24,12 +24,14 @@ I built this project to demonstrate reusable and scalable Terraform modules, all
 ## Architecture
 
 The structure follows a per-module layout:
-
+```markdown
 /03-iac-terraform/
 ├── terragrunt.hcl
 ├── common.tfvars
 ├── vpc/
 │ └── main.tf
+│ └── variables.tf
+│ └── terrragrunt.hcl
 ├── s3/
 │ └── main.tf
 ├── dynamodb/
@@ -38,7 +40,7 @@ The structure follows a per-module layout:
 │ └── main.tf
 ├── rds/
 │ ├── main.tf
-
+```
 
 Each directory represents a logical layer, sourced from my centralized [`tf-modules`](https://github.com/tedens/tf-modules) repository to ensure consistency across environments and projects.
 
@@ -51,8 +53,8 @@ Each directory represents a logical layer, sourced from my centralized [`tf-modu
   - Reusable modules (e.g. VPC, RDS, IAM) designed for clean inputs/outputs
 - **Security groups scoped to RDS**
   - Created locally within the RDS module for flexibility
-- **Environment-aware tagging**
-  - Consistent tag structure using `project_name` and `env`
+- **Environment and Project tagging**
+  - Consistent tag structure using `project_name` and `env` on all resources
 
 ## Deployment
 
