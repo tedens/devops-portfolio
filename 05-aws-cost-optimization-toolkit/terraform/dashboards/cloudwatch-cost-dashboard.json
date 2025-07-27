@@ -1,0 +1,82 @@
+{
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 24,
+      "height": 1,
+      "properties": {
+        "markdown": "# AWS Cost Overview"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 1,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [ "AWS/Billing", "EstimatedCharges", "Currency", "USD" ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-2",
+        "stat": "Maximum",
+        "title": "Total Estimated Charges (USD)"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 1,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [ { "expression": "SEARCH('MetricName=\"EstimatedCharges\" Currency=\"USD\" Service!=\"\"', 'Maximum', 300)", "label": "By Service", "id": "e1", "region": "us-east-2" } ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-2",
+        "stat": "Maximum",
+        "title": "Estimated Charges by Service"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 7,
+      "width":  12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [ { "expression": "SEARCH('MetricName=\"EstimatedCharges\" Currency=\"USD\" LinkedAccount!=\"\"', 'Maximum', 300)", "label": "By Account", "id": "e2", "region": "us-east-2" } ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-2",
+        "stat": "Maximum",
+        "title": "Estimated Charges by Account"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 7,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [ { "expression": "SEARCH('MetricName=\"EstimatedCharges\" Currency=\"USD\" Region!=\"\"', 'Maximum', 300)", "label": "By Region", "id": "e3", "region": "us-east-2" } ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-2",
+        "stat": "Maximum",
+        "title": "Estimated Charges by Region"
+      }
+    }
+  ]
+}
