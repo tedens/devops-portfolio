@@ -1,7 +1,6 @@
 ---
 title: "Anthony Edens – DevOps Portfolio"
 layout: page
-page.hide_title: true
 ---
 
 # 👋 Welcome
