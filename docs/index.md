@@ -1,11 +1,12 @@
 ---
 title: "Anthony Edens – DevOps Portfolio"
-layout: default
+layout: page
+page.hide_title: true
 ---
 
 # 👋 Welcome
 
-My name is **Anthony (TJ) Edens**, and I’m a DevOps Manager with over 7 years of experience designing automation-first infrastructure, along with 15+ years in full-stack development and Linux systems administration.
+My name is **Anthony (TJ) Edens**, and I’m a DevOps Manager with over 8 years of experience designing automation-first infrastructure, along with 15+ years in full-stack development and Linux systems administration.
 
 I currently lead the DevOps initatives at a Healthcare SaaS, where I:
 

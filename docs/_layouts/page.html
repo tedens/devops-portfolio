@@ -32,7 +32,11 @@
         <a class="nav-link" href="https://linkedin.com/in/tjedens" target="_blank">LinkedIn Profile</a>
       </nav>
       <main>
-        <h1>{{ page.title }}</h1>
+        {% unless page.hide_title %}
+          <header>
+            <h1>{{ site.title }}</h1>
+          </header>
+        {% endunless %}
         {{ content }}
       </main>
     </div>
