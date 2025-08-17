@@ -1,6 +1,7 @@
 ---
 title: "Monitoring & Logging Stack with Prometheus, Grafana & Loki"
 layout: page
+permalink: /04-monitoring-logging/
 ---
 
 This project sets up a full local observability stack using Docker Compose.

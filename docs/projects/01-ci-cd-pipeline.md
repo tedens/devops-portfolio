@@ -1,6 +1,7 @@
 ---
 title: "CI/CD Pipeline with GitHub Actions"
 layout: page
+permalink: /01-jenkins-ci-cd-pipeline/
 ---
 This project demonstrates a basic CI/CD workflow using GitHub Actions for a Node.js + Docker application.
 

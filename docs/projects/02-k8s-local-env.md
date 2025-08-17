@@ -1,6 +1,7 @@
 ---
 title: "Kubernetes Local Environment with Docker Desktop"
 layout: page
+permalink: /02-k8s-local-env/
 ---
 
 This project sets up a microservice in Kubernetes using Docker Desktop as the local K8s cluster.

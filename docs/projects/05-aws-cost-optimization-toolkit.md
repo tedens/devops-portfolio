@@ -1,7 +1,7 @@
 ---
 title: "AWS Cost Optimization Toolkit"
-permalink: /05-aws-cost-optimization-toolkit/
 layout: default
+permalink: /05-aws-cost-optimization-toolkit/
 ---
 
 This project provides a lightweight AWS cost governance toolkit focused on visibility, automation, and enforcement. It includes Bash scripts and dashboards designed to help teams reduce unnecessary cloud spend and enforce good tagging hygiene across AWS environments.

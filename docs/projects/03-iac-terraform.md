@@ -1,6 +1,7 @@
 ---
 title: "Infrastructure as Code (Terraform + AWS)"
 layout: page
+permalink: /03-iac-terraform/
 ---
 
 This project showcases a fully modular, production-grade Infrastructure as Code setup using **Terraform** and **Terragrunt** to provision cloud infrastructure across AWS.
