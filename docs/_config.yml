@@ -1,6 +1,6 @@
 title: "Anthony Edens – DevOps Portfolio"
 description: "DevOps projects in CI/CD, Kubernetes, IaC, and Monitoring by Anthony Edens"
-baseurl: "" 
+baseurl: "/devops-portfolio/" 
 url: "https://tedens.github.io"
 
 theme: null
