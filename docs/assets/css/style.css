@@ -81,3 +81,20 @@ nav a:hover {
 .dropdown-content a:hover {
   background-color: #2a2a2a;
 }
+
+.dropdown-section {
+  border-top: 1px solid #333;
+  padding: 0.5rem 0;
+}
+
+.dropdown-section:first-child {
+  border-top: none;
+}
+
+.dropdown-label {
+  font-weight: bold;
+  padding: 0.25rem 1rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
