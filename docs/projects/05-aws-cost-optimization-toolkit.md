@@ -40,4 +40,7 @@ You’ve got six AWS accounts with various workloads running — and no single v
 
 Run the tag audit script:
 ```bash
-./tag-audit.sh --profile fanout --env dev
+./tag-audit.sh --profile $AWS_PROFILE --env dev
+```
+
+### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/03-iac-terraform)

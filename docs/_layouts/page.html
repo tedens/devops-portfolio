@@ -8,13 +8,28 @@
   </head>
   <body>
     <div class="container">
-      <nav style="margin-bottom: 2rem;">
-        <a href="{{ site.baseurl }}">🏠 Home</a> |
-        <a href="{{ site.baseurl }}/01-jenkins-ci-cd-pipeline">Jenkins CI/CD</a> |
-        <a href="{{ site.baseurl }}/02-k8s-local-env">App Deploy (Local K8s)</a> |
-        <a href="{{ site.baseurl }}/03-iac-terraform">Terraform IaC</a> |
-        <a href="{{ site.baseurl }}/04-monitoring-logging">Metrics and Monitoring</a> |
-        <a href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit">AWS Cost Toolkit</a>
+      <nav class="main-nav">
+        <a class="nav-link" href="{{ site.baseurl }}">🏠 Home</a>
+        <div class="dropdown">
+          <button class="dropdown-button">Projects ▾</button>
+          <div class="dropdown-content">
+            <div class="dropdown-section">
+              <div class="dropdown-label">CI/CD & Deployment</div>
+              <a class="dropdown-item" href="{{ site.baseurl }}/01-jenkins-ci-cd-pipeline/">Jenkins CI/CD</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/02-k8s-local-env/">App Deploy (Local K8s)</a>
+            </div>
+            <div class="dropdown-section">
+              <div class="dropdown-label">Infrastructure as Code</div>
+              <a class="dropdown-item" href="{{ site.baseurl }}/03-iac-terraform/">Terraform IaC</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit/">AWS Cost Toolkit</a>
+            </div>
+            <div class="dropdown-section">
+              <div class="dropdown-label">Monitoring & Ops</div>
+              <a class="dropdown-item" href="{{ site.baseurl }}/04-monitoring-logging/">Metrics and Monitoring</a>
+            </div>
+          </div>
+        </div>
+        <a class="nav-link" href="https://linkedin.com/in/tjedens" target="_blank">LinkedIn Profile</a>
       </nav>
       <main>
         <h1>{{ page.title }}</h1>
