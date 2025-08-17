@@ -7,17 +7,19 @@
     <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css" />
   </head>
   <body>
-    <nav style="margin-bottom: 2rem;">
-      <a href="{{ site.baseurl }}/">🏠 Home</a> |
-      <a href="{{ site.baseurl }}/01-jenkins-ci-cd-pipeline/">Jenkins CI/CD</a> |
-      <a href="{{ site.baseurl }}/02-k8s-local-env/">Terraform IaC</a> |
-      <a href="{{ site.baseurl }}/03-iac-terraform/">Monitoring Dashboard</a> |
-      <a href="{{ site.baseurl }}/04-monitoring-logging/">S3 Hosting</a> |
-      <a href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit/">Cost Toolkit</a>
-    </nav>
-    <main>
-      <h1>{{ page.title }}</h1>
-      {{ content }}
-    </main>
+    <div class="container">
+      <nav style="margin-bottom: 2rem;">
+        <a href="{{ site.baseurl }}">🏠 Home</a> |
+        <a href="{{ site.baseurl }}/01-jenkins-ci-cd-pipeline">Jenkins CI/CD</a> |
+        <a href="{{ site.baseurl }}/02-k8s-local-env">App Deploy (Local K8s)</a> |
+        <a href="{{ site.baseurl }}/03-iac-terraform">Terraform IaC</a> |
+        <a href="{{ site.baseurl }}/04-monitoring-logging">Metrics and Monitoring</a> |
+        <a href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit">AWS Cost Toolkit</a>
+      </nav>
+      <main>
+        <h1>{{ page.title }}</h1>
+        {{ content }}
+      </main>
+    </div>
   </body>
 </html>

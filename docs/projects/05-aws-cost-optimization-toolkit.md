@@ -1,6 +1,6 @@
 ---
 title: "AWS Cost Optimization Toolkit"
-layout: default
+layout: page
 permalink: /05-aws-cost-optimization-toolkit/
 ---
 
