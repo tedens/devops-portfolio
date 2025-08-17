@@ -1,32 +1,57 @@
-# Welcome!
+---
+title: "Anthony Edens – DevOps Portfolio"
+layout: default
+---
 
-My name is Anthony Edens, and I am a DevOps Manager with over 7 years of experience in automation, infrastructure, and engineering leadership—and more than a decade of backend development and systems administration before that.
+# 👋 Welcome
 
-I currently take on the following responsibilites at a HealthCare SaaS:
-- Architect and maintain Kubernetes clusters with >99.995% uptime
-- Run secure CI/CD pipelines that support mobile and web applications
-- Lead cost optimization efforts (saving 60%+ cloud spend)
-- Mentor development teams on security, observability, and scalability
-- Oversee internal IT operations and manage compliance audits
+My name is **Anthony (TJ) Edens**, and I’m a DevOps Manager with over 7 years of experience designing automation-first infrastructure, along with 15+ years in full-stack development and Linux systems administration.
 
-Previously, I served as a DevOps Engineer at AC Moore/Capstan, supporting AI-driven applications and orchestrating infrastructure transitions through company acquisition. My roots are in Linux systems administration and PHP/Python backend development at InMotion Hosting and SingleHop—two major web hosting providers.
+I currently lead the DevOps initatives at a Healthcare SaaS, where I:
 
-This portfolio showcases just a few of the foundational systems and workflows I’ve designed or built:
+- Architect and manage multi-account Kubernetes infrastructure with >99.995% uptime
+- Run secure, audit-ready CI/CD pipelines for web and mobile apps
+- Drive cost optimization initiatives (cutting cloud spend by over 60%)
+- Mentor engineers on observability, reliability, and DevSecOps
+- Oversee internal IT operations and support HIPAA/SOC2 compliance
 
-## 🔧 Projects
-- [CI/CD Pipeline](projects/01-ci-cd-pipeline.html) — GitHub Actions + Docker
-- [Kubernetes Local Environment](projects/02-k8s-local-env.html) — Local app deployment using Docker Desktop + K8s
-- [Infrastructure as Code (WIP)](projects/03-iac-terraform.html) — AWS provisioning with modular Terraform
-- [Monitoring & Logging](projects/04-monitoring-logging.html) — Prometheus, Grafana, and Loki stack via Docker Compose
-- [Portfolio Site](projects/05-portfolio-site.html) — This site, built with Jekyll and GitHub Pages
+Previously, I worked at AC Moore and Capstan supporting AI/ML infrastructure during M&A transitions. Earlier in my career, I built and supported high-availability systems for major hosting providers like SingleHop and InMotion Hosting.
 
-## 🔍 Focus Areas
-- Scalable cloud architecture (AWS, GCP, Azure)
-- CI/CD pipelines, container orchestration, infrastructure as code
-- Monitoring, observability, and cost-efficiency
-- Security best practices and cross-functional DevOps collaboration
+---
 
-## 📫 Availability
-I’m open to long-term part-time DevOps contracts (10–25 hrs/week) and fractional CTO advisory roles. I specialize in early-stage technical foundations, migrations, and system hardening.
+## Portfolio Projects
 
-Thanks for checking out my work!
+These hands-on projects reflect the core platforms and automation I’ve built in production environments:
+
+| Project | Summary |
+|--------|---------|
+| [Jenkins CI/CD Pipeline](/01-jenkins-ci-cd-pipeline/) | Modular pipeline with versioning, promotions, Helm deployment |
+| [Terraform Infrastructure Modules](/02-infra-modules/) | Reusable modules for VPC, IAM, EKS, RDS, and more |
+| [Monitoring & Logging](/03-monitoring-dashboard/) | CloudWatch dashboards + alerting + budget enforcement |
+| [S3 Static Site Hosting](/04-s3-static-site/) | Secure and cost-effective static site deployment |
+| [AWS Cost Optimization Toolkit](/05-aws-cost-optimization-toolkit/) | Tag audit, budget alerts, and dashboards to reduce waste |
+
+> ⚙️ All projects include source code, documentation, and examples.
+
+---
+
+## Focus Areas
+
+- **Cloud Architecture:** AWS (8+ yrs), GCP, Azure  
+- **Infrastructure as Code:** Terraform, Helm, CloudFormation  
+- **Containers & Orchestration:** Docker, Kubernetes, ArgoCD  
+- **CI/CD:** Jenkins, GitHub Actions, GitLab, Secure Release Flows  
+- **Monitoring & Cost Efficiency:** CloudWatch, Datadog, Budgets, Dashboards  
+- **Compliance:** HIPAA, SOC2, audit-ready automation  
+
+---
+
+## Contract Availability
+
+I'm currently open to:
+
+- **Long-term part-time DevOps contracts (10–25 hrs/week)**
+- **Fractional or advisory CTO roles**
+- **DevOps mentorship engagements**
+
+If you need someone to build secure, scalable foundations from scratch—or mature your infrastructure into something audit-ready and efficient—I’d love to hear from you.
