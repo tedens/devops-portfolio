@@ -25,10 +25,13 @@ These hands-on projects reflect the core platforms and automation I’ve built i
 
 {% assign grouped = site.data.projects | group_by: "category" %}
 {% for group in grouped %}
-  #### 🗂 {{ group.name }}
-  {% for project in group.items %}
-    - **[{{ project.title }}]({{ site.baseurl }}{{ project.path }})** — {{ project.summary }}
-  {% endfor %}
+  #### 📂 {{ group.name }}
+
+  <ul>
+    {% for project in group.items %}
+      <li><strong><a href="{{ site.baseurl }}{{ project.path }}">{{ project.title }}</a></strong> — {{ project.summary }}</li>
+    {% endfor %}
+  </ul>
 {% endfor %}
 
 > All projects include source code, documentation, and examples.
