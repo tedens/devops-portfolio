@@ -25,11 +25,9 @@ These hands-on projects reflect the core platforms and automation I’ve built i
 
 | Project | Summary |
 |--------|---------|
-| [Github Actions CI/CD Pipeline]({{ site.baseurl }}/01-ci-cd-pipeline/) | Modular pipeline with versioning |
-| [Node App in Local K8s]({{ site.baseurl }}/02-k8s-local-env/) | Deploys a basic Node app in a local K8s cluster |
-| [Terraform Infrastructure Modules]({{ site.baseurl }}/03-iac-terraform/) | Reusable modules for VPC, IAM, EKS, RDS, and more |
-| [Monitoring & Logging]({{ site.baseurl }}/04-monitoring-logging/) | CloudWatch dashboards + alerting + budget enforcement |
-| [AWS Cost Optimization Toolkit]({{ site.baseurl }}/05-aws-cost-optimization-toolkit/) | Tag audit, budget alerts, and dashboards to reduce waste |
+{% for project in site.data.projects %}
+| [{{ project.title }}]({{ site.baseurl }}{{ project.path }}) | {{ project.summary }} |
+{% endfor %}
 
 > All projects include source code, documentation, and examples.
 

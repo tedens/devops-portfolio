@@ -1,0 +1,27 @@
+- title: Github Actions CI/CD Pipeline
+  path: /01-ci-cd-pipeline/
+  summary: Modular pipeline with versioning
+
+- title: Node App in Local K8s
+  path: /02-k8s-local-env/
+  summary: Deploys a basic Node app in a local K8s cluster
+
+- title: Terraform Infrastructure Modules
+  path: /03-iac-terraform/
+  summary: Reusable modules for VPC, IAM, EKS, RDS, and more
+
+- title: Monitoring & Logging
+  path: /04-monitoring-logging/
+  summary: CloudWatch dashboards + alerting + budget enforcement
+
+- title: AWS Cost Optimization Toolkit
+  path: /05-aws-cost-optimization-toolkit/
+  summary: Tag audit, budget alerts, and dashboards to reduce waste
+
+- title: Automated Secret Rotation
+  path: /06-secrets-rotation/
+  summary: Lambda + Terraform secret lifecycle with custom logic
+
+- title: Zero-Trust SSH Access
+  path: /08-zero-trust-ssh/
+  summary: GitHub SSO + session auditing with Teleport
