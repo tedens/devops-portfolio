@@ -5,7 +5,6 @@ provider "aws" {
 resource "aws_secretsmanager_secret" "rotating_secret" {
   name                    = var.secret_name
   description             = "Automatically rotated secret"
-  rotation_enabled        = true
   recovery_window_in_days = 7
 }
 
@@ -15,6 +14,14 @@ resource "aws_secretsmanager_secret_version" "initial_version" {
     username = "initial-user"
     password = "initial-password"
   })
+}
+
+resource "aws_lambda_permission" "allow_secrets_manager" {
+  statement_id  = "AllowSecretsManagerInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.rotator.function_name
+  principal     = "secretsmanager.amazonaws.com"
+  source_arn    = aws_secretsmanager_secret.rotating_secret.arn
 }
 
 resource "aws_iam_role" "lambda_rotation" {
