@@ -23,8 +23,12 @@ Previously, I worked at AC Moore and Capstan supporting AI/ML infrastructure dur
 
 These hands-on projects reflect the core platforms and automation I’ve built in production environments:
 
-{% for project in site.data.projects %}
-- **[{{ project.title }}]({{ site.baseurl }}{{ project.path }})** — {{ project.summary }}
+{% assign grouped = site.data.projects | group_by: "category" %}
+{% for group in grouped %}
+  #### 🗂 {{ group.name }}
+  {% for project in group.items %}
+    - **[{{ project.title }}]({{ site.baseurl }}{{ project.path }})** — {{ project.summary }}
+  {% endfor %}
 {% endfor %}
 
 > All projects include source code, documentation, and examples.
