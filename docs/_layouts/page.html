@@ -17,19 +17,29 @@
               <div class="dropdown-label">CI/CD & Deployment</div>
               <a class="dropdown-item" href="{{ site.baseurl }}/01-ci-cd-pipeline/">Jenkins CI/CD</a>
               <a class="dropdown-item" href="{{ site.baseurl }}/02-k8s-local-env/">App Deploy (Local K8s)</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/09-karpenter-spot-nodes">Karpenter K8s (Spot Nodes)</a>
             </div>
             <div class="dropdown-section">
               <div class="dropdown-label">Infrastructure as Code</div>
               <a class="dropdown-item" href="{{ site.baseurl }}/03-iac-terraform/">Terraform IaC</a>
               <a class="dropdown-item" href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit/">AWS Cost Toolkit</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/07-aws-multi-account-sso">Multi-Account AWS (SSO)</a>
+
             </div>
             <div class="dropdown-section">
               <div class="dropdown-label">Monitoring & Ops</div>
               <a class="dropdown-item" href="{{ site.baseurl }}/04-monitoring-logging/">Metrics and Monitoring</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/10-automated-dr-sim">Automated Disaster Recovery</a>
+            </div>
+            <div class="dropdown-section">
+              <div class="dropdown-label">Security</div>
+              <a class="dropdown-item" href="{{ site.baseurl }}/06-secrets-rotation/">Secrets Auto-Rotation</a>
+              <a class="dropdown-item" href="{{ site.baseurl }}/08-zero-trust-ssh">Zero-Trust SSH Access</a>
             </div>
           </div>
         </div>
         <a class="nav-link" href="https://linkedin.com/in/tjedens" target="_blank">LinkedIn Profile</a>
+        <a class="dropdown-item" href="{{ site.baseurl }}/contact">Contact Me</a>
       </nav>
       <main>
         {% if page.title %}
