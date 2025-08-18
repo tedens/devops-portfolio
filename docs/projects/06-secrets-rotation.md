@@ -50,3 +50,5 @@ Test by manually triggering a secret rotation and watch the cloudwatch logs.
 ```bash
 aws secretsmanager rotate-secret --secret-id auto-rotated-secret
 ```
+
+### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/06-secrets-rotation)

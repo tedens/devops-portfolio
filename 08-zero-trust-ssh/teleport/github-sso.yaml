@@ -1,0 +1,17 @@
+kind: github
+version: v3
+metadata:
+  name: github
+spec:
+  client_id: YOUR_GITHUB_OAUTH_CLIENT_ID
+  client_secret: YOUR_GITHUB_OAUTH_CLIENT_SECRET
+  redirect_url: https://<your-bastion-ip>/
+  display: GitHub
+  teams_to_logins:
+    - organization: your-github-org
+      team: devops
+      logins: ["ubuntu"]
+  claims_to_roles:
+    - claim: teams
+      value: "your-github-org:devops"
+      roles: ["admin"]
