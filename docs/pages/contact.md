@@ -17,8 +17,7 @@ If you're interested in working together—whether it's long-term DevOps contrac
     <label for="message">Message</label><br>
     <textarea name="message" id="message" rows="6" required></textarea><br><br>
 
-    <!-- reCAPTCHA widget -->
-    <div class="g-recaptcha" data-sitekey="6LdAmakrAAAAABiUSsD7ImLTVTtLuWy5KeSD8ZlO"></div><br>
+    <div class="g-recaptcha" data-sitekey="6Le8m6krAAAAAIp0gvDtOQeETWO7lETJ3Gnsnxsz"></div><br>
 
     <button type="submit">Send</button>
   </form>
