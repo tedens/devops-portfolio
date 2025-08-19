@@ -28,6 +28,11 @@
   summary: Lambda + Terraform secret lifecycle with custom logic
   category: Security
 
+- title: AWS Multi-Account With SSO
+  path: /07-aws-multi-account-sso/
+  summary: Centralized access management for multiple AWS accounts using SSO
+  category: Access Management
+
 - title: Zero-Trust SSH Access
   path: /08-zero-trust-ssh/
   summary: GitHub SSO + session auditing with Teleport
