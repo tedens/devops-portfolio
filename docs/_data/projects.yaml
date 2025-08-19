@@ -32,3 +32,8 @@
   path: /08-zero-trust-ssh/
   summary: GitHub SSO + session auditing with Teleport
   category: Access Management
+
+- title: ACM Manager (K8s Controller)
+  path: /11-acm-manager/
+  summary: Kubernetes controller to automate public cert provisioning
+  category: Open Source

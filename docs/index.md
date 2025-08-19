@@ -25,7 +25,7 @@ These hands-on projects reflect the core platforms and automation I’ve built i
 
 {% assign grouped = site.data.projects | group_by: "category" %}
 {% for group in grouped %}
-  ### 📂 {{ group.name }}
+ <h3>{{ group.name }}</h3>
 
   <ul>
     {% for project in group.items %}
