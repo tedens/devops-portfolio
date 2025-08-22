@@ -1,0 +1,6 @@
+[submodule "00-web3/01-casino-game/lib/forge-std"]
+	path = 00-web3/01-casino-game/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "00-web3/01-casino-game/lib/openzeppelin-contracts"]
+	path = 00-web3/01-casino-game/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
