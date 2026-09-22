@@ -1,0 +1,29 @@
+# Terraform
+**/.terraform/
+# .terraform.lock.hcl is deliberately NOT ignored: it pins provider versions
+# and hashes, so committing it is what makes a plan reproducible.
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+
+# Packaged lambdas
+**/lambda.zip
+**/*.zip
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/*.pub
+
+# Local noise
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc

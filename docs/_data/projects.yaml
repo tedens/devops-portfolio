@@ -111,18 +111,20 @@
 - id: automated-dr-sim
   title: "Automated DR Simulation"
   path: /10-automated-dr-sim/
-  summary: "Terraform-provisioned recovery target with a restore-validation script, so the runbook is tested rather than trusted."
+  summary: "A scheduled restore drill that rebuilds production from a snapshot, proves the data is really there, measures the recovery time and destroys itself."
   category: Resilience
-  status: wip
+  status: live
   year: 2026
-  stack: [Terraform, Bash, AWS]
+  stack: [Terraform, Bash, AWS RDS, SSM, GitHub Actions]
   repo: https://github.com/tedens/devops-portfolio/tree/main/10-automated-dr-sim
 
 - id: karpenter-spot
   title: "Karpenter Spot Node Provisioning"
   path: /09-karpenter-spot-nodes/
-  summary: "Cluster autoscaling onto spot capacity with consolidation and disruption budgets."
+  summary: "Spot-first node provisioning on EKS, with consolidation, disruption budgets and an interruption drill that proves a reclaim is survivable."
   category: Kubernetes
-  status: planned
+  status: live
+  featured: true
   year: 2026
-  stack: [Karpenter, EKS, AWS Spot]
+  stack: [Karpenter, EKS, Terraform, AWS Spot, FIS]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/09-karpenter-spot-nodes

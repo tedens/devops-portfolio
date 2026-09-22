@@ -1,0 +1,70 @@
+# Monthly restore drill.
+#
+# Not placed in .github/workflows on purpose: it needs an AWS role and a real
+# snapshot to point at, so copy it across once those exist. Running it on a
+# schedule is the entire value of the project. A drill you only run when you
+# remember is the same as no drill.
+
+name: DR restore drill
+
+on:
+  schedule:
+    - cron: "0 6 1 * *" # 06:00 UTC on the 1st
+  workflow_dispatch:
+    inputs:
+      snapshot:
+        description: "Snapshot to restore (defaults to the newest)"
+        required: false
+
+permissions:
+  contents: read
+  id-token: write # OIDC, so no long-lived AWS keys live in the repo
+
+concurrency:
+  group: dr-drill
+  cancel-in-progress: false
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      AWS_REGION: us-east-2
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DR_DRILL_ROLE_ARN }}
+          aws-region: us-east-2
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Run the drill
+        working-directory: 10-automated-dr-sim
+        run: |
+          ./scripts/run_drill.sh \
+            --source-db "${{ vars.DR_SOURCE_DB }}" \
+            --database  "${{ vars.DR_DATABASE }}" \
+            --secret    "${{ secrets.DR_DB_SECRET_ARN }}" \
+            --tables    "${{ vars.DR_CHECK_TABLES }}" \
+            --freshness-table "${{ vars.DR_FRESHNESS_TABLE }}" \
+            ${{ inputs.snapshot && format('--snapshot {0}', inputs.snapshot) || '' }}
+
+      - name: Publish the result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-drill-result
+          path: 10-automated-dr-sim/results/*.json
+          if-no-files-found: warn
+
+      # The teardown already runs from a trap inside run_drill.sh. This is the
+      # backstop for the case where the runner itself is killed.
+      - name: Backstop teardown
+        if: failure() || cancelled()
+        working-directory: 10-automated-dr-sim
+        run: ./scripts/teardown.sh || true

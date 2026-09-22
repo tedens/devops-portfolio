@@ -19,8 +19,8 @@ The full site with documentation, diagrams, and project deep-dives is published 
 | 06 | Secrets Rotation | Lambda + Terraform for automated secrets rotation. | [Docs](https://tedens.github.io/devops-portfolio/06-secrets-rotation/) |
 | 07 | Multi-Account AWS SSO | Centralised identity and permission sets across an Organization. | [Docs](https://tedens.github.io/devops-portfolio/07-aws-multi-account-sso/) |
 | 08 | Zero-Trust SSH | Teleport + Terraform to enforce short-lived SSH certs. | [Docs](https://tedens.github.io/devops-portfolio/08-zero-trust-ssh/) |
-| 09 | Karpenter Spot Nodes | Cluster autoscaling with spot provisioning. **Planned.** | [Docs](https://tedens.github.io/devops-portfolio/09-karpenter-spot-nodes/) |
-| 10 | Automated DR Simulation | Terraform recovery target + restore validation. **WIP.** | [Docs](https://tedens.github.io/devops-portfolio/10-automated-dr-sim/) |
+| 09 | Karpenter Spot Nodes | Spot-first EKS provisioning with consolidation and an FIS interruption drill. | [Docs](https://tedens.github.io/devops-portfolio/09-karpenter-spot-nodes/) |
+| 10 | Automated DR Simulation | Scheduled restore drill that measures RTO/RPO and tears itself down. | [Docs](https://tedens.github.io/devops-portfolio/10-automated-dr-sim/) |
 | 11 | ACM Manager | Kubernetes controller automating ACM certs for Ingress. | [Docs](https://tedens.github.io/devops-portfolio/11-acm-manager/) |
 | 14 | Seven Niche Business Sites | Seven complete demo sites, one per industry. Live and clickable. | [Docs](https://tedens.github.io/devops-portfolio/14-niche-web-design/) |
 
@@ -97,4 +97,4 @@ For detailed guides and screenshots, see the [documentation site](https://tedens
 ---
 
 ## Status
-This portfolio is actively maintained. Some projects are **demo-ready**, others are **WIP** (see project docs for details).
+This portfolio is actively maintained. Every project has working code and documentation; see each project page for what has and has not been run against a live account.

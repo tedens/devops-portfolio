@@ -1,0 +1,67 @@
+# The default pool: spot first, broad instance choice, aggressive cleanup.
+#
+# Breadth is the thing that makes spot reliable. Restricting to two instance
+# types means competing for two pools; allowing a family across several
+# generations and sizes means AWS almost always has something, and
+# interruptions get rarer because the capacity pools are deeper.
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    metadata:
+      labels:
+        capacity: spot
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+
+      # 30 days. Nodes are cattle; rotating them regularly means the AMI
+      # patch level never drifts far and a node that has been up for a year
+      # never exists to worry about.
+      expireAfter: 720h
+
+      terminationGracePeriod: 1h
+
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot", "on-demand"] # on-demand is the fallback, not the default
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64", "arm64"] # Graviton is usually the cheapest option
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m", "r"]
+        - key: karpenter.k8s.aws/instance-generation
+          operator: Gt
+          values: ["5"]
+        - key: karpenter.k8s.aws/instance-size
+          operator: NotIn
+          values: ["nano", "micro", "small"] # too small to be worth the kubelet
+
+  disruption:
+    # Actively shrink the cluster, not just grow it. This is where the saving
+    # actually comes from: most clusters scale up under load and then stay
+    # scaled up.
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+
+    budgets:
+      # Never voluntarily disrupt more than a tenth of the fleet at once.
+      - nodes: "10%"
+      # And nothing at all during the Monday release window. Spot reclaims
+      # still happen, they are involuntary; this only limits what Karpenter
+      # itself chooses to do.
+      - nodes: "0"
+        schedule: "0 9 * * mon"
+        duration: 4h
+
+  limits:
+    cpu: "300"
+    memory: 1200Gi
+
+  weight: 100

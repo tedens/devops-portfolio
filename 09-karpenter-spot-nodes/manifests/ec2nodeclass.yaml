@@ -1,0 +1,42 @@
+# What the nodes are made of: AMI, disk, networking, identity.
+# The NodePools below decide when to make one; this decides what it looks like.
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # Bottlerocket: smaller attack surface than a general-purpose AMI, and it
+  # boots fast, which matters when you are replacing a node on two minutes'
+  # notice.
+  amiFamily: Bottlerocket
+
+  amiSelectorTerms:
+    - alias: bottlerocket@latest
+
+  role: KarpenterNodeRole-CLUSTER_NAME
+
+  # Discovery by tag rather than hardcoded IDs, so the cluster can gain
+  # subnets without a change here.
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: CLUSTER_NAME
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: CLUSTER_NAME
+
+  blockDeviceMappings:
+    - deviceName: /dev/xvdb
+      ebs:
+        volumeSize: 50Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true
+
+  metadataOptions:
+    httpEndpoint: enabled
+    httpTokens: required # IMDSv2 only
+    httpPutResponseHopLimit: 1 # pods cannot reach the node's credentials
+
+  tags:
+    ManagedBy: karpenter
+    Cluster: CLUSTER_NAME

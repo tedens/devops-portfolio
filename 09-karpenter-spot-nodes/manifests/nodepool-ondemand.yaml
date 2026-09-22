@@ -1,0 +1,48 @@
+# For workloads that genuinely cannot take a two-minute eviction: stateful
+# singletons, long batch jobs, anything mid-migration.
+#
+# Reaching this pool requires a toleration, so nothing lands here by accident
+# and quietly doubles the bill.
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: on-demand
+spec:
+  template:
+    metadata:
+      labels:
+        capacity: on-demand
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+
+      taints:
+        - key: workload/interruption-intolerant
+          value: "true"
+          effect: NoSchedule
+
+      expireAfter: 720h
+
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64", "arm64"]
+        - key: karpenter.k8s.aws/instance-generation
+          operator: Gt
+          values: ["5"]
+
+  disruption:
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 5m
+    budgets:
+      - nodes: "1"
+
+  limits:
+    cpu: "100"
+
+  weight: 10 # lower than default, so spot wins whenever it can

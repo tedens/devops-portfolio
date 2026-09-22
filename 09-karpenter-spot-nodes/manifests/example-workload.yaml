@@ -1,0 +1,60 @@
+# What a workload has to look like to be safe on spot. Karpenter handles the
+# node; these three things are what stop a reclaim becoming an outage.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels: { app: web }
+spec:
+  replicas: 6
+  selector:
+    matchLabels: { app: web }
+  template:
+    metadata:
+      labels: { app: web }
+    spec:
+      # 1. Spread across nodes and zones, so losing one node or one spot pool
+      #    cannot take a majority of replicas with it.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels: { app: web }
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app: web }
+
+      # 2. Shut down inside the two minutes a spot notice gives you.
+      terminationGracePeriodSeconds: 60
+
+      containers:
+        - name: web
+          image: public.ecr.aws/nginx/nginx:1.27
+          ports: [{ containerPort: 80 }]
+          # 3. Requests, so Karpenter can size a node correctly. Without them
+          #    it guesses, and consolidation cannot reason about the fit.
+          resources:
+            requests: { cpu: 200m, memory: 256Mi }
+            limits: { memory: 256Mi }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 2
+          lifecycle:
+            preStop:
+              exec:
+                # Let the load balancer notice before the process goes away.
+                command: ["sh", "-c", "sleep 10"]
+---
+# The backstop. Karpenter honours PDBs during voluntary disruption, so this
+# is what stops consolidation draining the whole deployment at once.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+spec:
+  minAvailable: 4
+  selector:
+    matchLabels: { app: web }
