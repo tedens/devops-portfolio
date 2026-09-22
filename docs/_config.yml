@@ -1,23 +1,39 @@
-title: "Anthony Edens – DevOps Portfolio"
-description: "DevOps projects in CI/CD, Kubernetes, IaC, and Monitoring by Anthony Edens"
-baseurl: "/devops-portfolio/" 
+title: "Anthony Edens"
+tagline: "DevOps & Platform Engineering"
+description: "DevOps and platform engineering portfolio: Kubernetes, Terraform, CI/CD, AWS cost and security automation, plus full-stack product work. By Anthony (TJ) Edens."
+author: "Anthony (TJ) Edens"
+career_start: 2012   # professional; writing code since ~13, which is not the same thing
+baseurl: "/devops-portfolio"
 url: "https://tedens.github.io"
+
+github_repo: "https://github.com/tedens/devops-portfolio"
+linkedin: "https://linkedin.com/in/tjedens"
 
 theme: null
 markdown: kramdown
 highlighter: rouge
-hide_title: true
 plugins:
   - jekyll-seo-tag
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
 
 exclude:
   - README.md
   - Gemfile
   - Gemfile.lock
+  - vendor
+
+# The demo sites under /demos/ are static, self-contained builds with no front
+# matter, so Jekyll copies them verbatim rather than rendering them.
 
 defaults:
-  -
-    scope:
+  - scope:
       path: ""
     values:
-      layout: "default"
+      layout: "page"
+  - scope:
+      path: "demos"
+    values:
+      sitemap: false

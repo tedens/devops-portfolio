@@ -1,0 +1,55 @@
+/* Portfolio chrome injected above each demo site.
+
+   The demos are self-contained client-ready sites with their own sticky
+   headers at top:0, so this bar is fixed above them and the demo's own
+   sticky chrome is pushed down by exactly its height. Nothing else about
+   the demo is touched. */
+
+:root { --pf-bar: 38px; }
+
+body { padding-top: var(--pf-bar); }
+
+.pfbar {
+  position: fixed; inset: 0 0 auto 0; z-index: 99999;
+  height: var(--pf-bar);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px;
+  background: #0a0b0a;
+  border-bottom: 1px solid #262e27;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: #aab4ac;
+}
+.pfbar a { color: #c8fa3c; text-decoration: none; white-space: nowrap; }
+.pfbar a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pfbar__back { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+.pfbar__back span { transition: transform .15s ease; }
+.pfbar__back:hover span { transform: translateX(-3px); }
+.pfbar__label {
+  margin-left: auto; margin-right: auto;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: #7b8880;
+}
+.pfbar__label b { color: #e9ede9; font-weight: 500; }
+.pfbar__all { margin-left: auto; }
+.pfbar :focus-visible { outline: 2px solid #c8fa3c; outline-offset: 2px; }
+
+/* The demo's own sticky header sits directly under the bar. */
+.header { top: var(--pf-bar) !important; }
+
+/* Secondary sticky panels hang off the header, so they shift by the same
+   amount. Two groups: those that butt against the header, and those that
+   leave a gap. */
+.filterbar, .stayhead {
+  top: calc(var(--header-h, 64px) + var(--pf-bar)) !important;
+}
+.summary, .buybox, .rail, .planwrap, .calcout {
+  top: calc(var(--header-h, 64px) + var(--pf-bar) + 1rem) !important;
+}
+
+@media (max-width: 700px) {
+  .pfbar__label { display: none; }
+  .pfbar__all { margin-left: auto; }
+}
+
+@media print { .pfbar { display: none; } body { padding-top: 0; } }

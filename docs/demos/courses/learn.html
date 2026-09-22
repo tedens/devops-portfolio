@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player · Coursefolk</title>
+<meta name="description" content="Course player with lesson list, progress tracking, notes and resources.">
+<meta name="theme-color" content="#1a1230">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%235b3fd6'/%3E%3Cpath d='M22 38l28-14 28 14-28 14z' fill='%23fff'/%3E%3Cpath d='M34 46v16c0 5 7 9 16 9s16-4 16-9V46' fill='none' stroke='%23fff' stroke-width='7'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="../portfolio-bar.css">
+</head>
+<body>
+<div class="pfbar">
+  <a class="pfbar__back" href="../../14-niche-web-design/"><span aria-hidden="true">&larr;</span> Back to portfolio</a>
+  <span class="pfbar__label">Live demo &middot; <b>Coursefolk</b></span>
+  <a class="pfbar__all" href="../">All 7 demos</a>
+</div>
+
+
+<a class="skip-link" href="#lesson">Skip to lesson</a>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <svg class="brand__mark" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" rx="26" fill="#5b3fd6"/>
+        <path d="M22 38l28-14 28 14-28 14z" fill="#fff"/>
+        <path d="M34 46v16c0 5 7 9 16 9s16-4 16-9V46" fill="none" stroke="#fff" stroke-width="7"/>
+      </svg>
+      <span class="brand__name">Coursefolk</span>
+    </a>
+
+    <p class="hide-sm" style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--ink)" id="p-course-title"></p>
+
+    <div class="header__actions">
+      <a class="btn btn--sm btn--quiet" href="dashboard.html">My learning</a>
+      <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="drawer">
+        <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">Open menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div class="drawer__head">
+      <span class="brand__name">Menu</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="drawer__nav" aria-label="Mobile">
+      <a href="catalog.html">Browse courses</a>
+      <a href="dashboard.html">My learning</a>
+      <a href="teach.html">Teach on Coursefolk</a>
+      <a href="upload.html">Upload a course</a>
+    </nav>
+    <div data-when-signed-in hidden>
+      <button class="btn btn--quiet btn--block" type="button" data-sign-out>Sign out</button>
+    </div>
+    <p class="drawer__meta">Fictional marketplace. Portfolio demo.</p>
+  </div>
+</div>
+
+<main>
+  <div id="player-root" hidden>
+    <div class="player-shell">
+
+      <!-- Stage -->
+      <div>
+        <div class="stage">
+          <div class="stage__video" id="stage">
+            <div>
+              <button class="playbtn" type="button" id="playbtn" aria-label="Play lesson">
+                <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7 4 20 12 7 20" fill="currentColor"/></svg>
+              </button>
+              <p class="stage__caption" id="stage-caption">Video placeholder, this demo has no media files.</p>
+            </div>
+          </div>
+          <div class="scrub">
+            <span id="scrub-now" style="font-variant-numeric:tabular-nums">0:00</span>
+            <span class="scrub__track"><span class="scrub__fill" id="scrub-fill"></span></span>
+            <span id="scrub-dur" style="font-variant-numeric:tabular-nums">0:00</span>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="lesson-body" id="lesson">
+            <div class="flex-between" style="align-items:start">
+              <div style="min-width:0">
+                <p class="muted" style="font-size:.86rem" id="l-section"></p>
+                <h1 style="font-size:var(--step-3)" id="l-title"></h1>
+              </div>
+              <button class="btn btn--sm" type="button" id="l-complete">Mark complete</button>
+            </div>
+
+            <div class="tabs mt-5" role="tablist" aria-label="Lesson detail">
+              <button class="tab" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+              <button class="tab" role="tab" id="tab-notes" aria-controls="panel-notes" aria-selected="false">My notes</button>
+              <button class="tab" role="tab" id="tab-resources" aria-controls="panel-resources" aria-selected="false">Resources</button>
+              <button class="tab" role="tab" id="tab-qa" aria-controls="panel-qa" aria-selected="false">Q&amp;A</button>
+            </div>
+
+            <div class="tabpanel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview">
+              <div class="measure stack" id="l-overview"></div>
+            </div>
+
+            <div class="tabpanel" role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden>
+              <div class="field measure">
+                <label for="l-notes">Notes for this lesson</label>
+                <textarea class="textarea" id="l-notes" placeholder="Timestamps, questions, things to try…" style="min-height:180px"></textarea>
+                <p class="hint" id="l-notes-status">Saved to this browser only.</p>
+              </div>
+            </div>
+
+            <div class="tabpanel" role="tabpanel" id="panel-resources" aria-labelledby="tab-resources" hidden>
+              <div class="panel panel--flush measure">
+                <div class="panel__head"><h3>Files for this lesson</h3></div>
+                <ul class="lessons" id="l-resources"></ul>
+              </div>
+            </div>
+
+            <div class="tabpanel" role="tabpanel" id="panel-qa" aria-labelledby="tab-qa" hidden>
+              <div class="measure stack">
+                <div class="panel">
+                  <div class="byline">
+                    <span class="avatar avatar--sm" style="--h:300" aria-hidden="true">PS</span>
+                    <span><span class="byline__name">Priya S.</span><br><span class="byline__role">3 days ago</span></span>
+                  </div>
+                  <p class="mt-3">Does this hold when the function is generic over two parameters at once, or does inference give up there too?</p>
+                  <div class="panel mt-4" style="background:var(--violet-50);border-color:var(--violet-100)">
+                    <div class="byline">
+                      <span class="avatar avatar--sm" id="qa-avatar" aria-hidden="true"></span>
+                      <span><span class="byline__name" id="qa-name"></span> <span class="tag">Instructor</span><br><span class="byline__role">2 days ago</span></span>
+                    </div>
+                    <p class="mt-3">It holds, but the order matters more than people expect. Inference runs left to right. There's a worked example in the exercise file for this lesson.</p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="qa-new">Ask a question</label>
+                  <textarea class="textarea" id="qa-new" placeholder="Be specific. Questions with a code snippet get answered fastest."></textarea>
+                  <div class="btn-row"><button class="btn btn--sm" type="button" id="qa-send">Post question</button></div>
+                  <p class="hint" id="qa-status" hidden>Demo only. Nothing was posted.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-between mt-6" style="padding-top:var(--sp-5);border-top:1px solid var(--line)">
+              <button class="btn btn--quiet" type="button" id="l-prev">← Previous lesson</button>
+              <button class="btn" type="button" id="l-next">Next lesson →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Syllabus -->
+      <aside class="syllabus" aria-label="Course contents">
+        <div class="syllabus__head">
+          <div class="flex-between">
+            <h2 style="font-size:1rem">Course contents</h2>
+            <span class="tag" id="p-percent">0%</span>
+          </div>
+          <div class="progressbar" aria-hidden="true"><div class="progressbar__fill" id="p-fill"></div></div>
+          <p class="muted mt-3" style="font-size:.84rem" id="p-progress-text"></p>
+        </div>
+        <div id="p-list"></div>
+      </aside>
+
+    </div>
+  </div>
+
+  <section class="section" id="player-missing" hidden>
+    <div class="container container--narrow">
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <h3>No course loaded</h3>
+        <p>Open a course from your library, or browse the catalogue.</p>
+        <div class="btn-row mt-5" style="justify-content:center">
+          <a class="btn" href="dashboard.html">My learning</a>
+          <a class="btn btn--ghost" href="catalog.html">Browse courses</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/data.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+<script src="assets/js/learn.js" defer></script>
+</body>
+</html>

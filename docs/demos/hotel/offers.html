@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offers & rates · The Lumen</title>
+<meta name="description" content="Three rate plans, how the nightly price is built from season and day of week, and the rate conditions in plain words.">
+<meta name="theme-color" content="#1d3a2e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2316241e'/%3E%3Cpath d='M20 6v28M6 20h28' stroke='%23f6f2e9' stroke-width='1.2'/%3E%3Crect x='21.5' y='7.5' width='11' height='11' fill='%23c47a48'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="../portfolio-bar.css">
+</head>
+<body>
+<div class="pfbar">
+  <a class="pfbar__back" href="../../14-niche-web-design/"><span aria-hidden="true">&larr;</span> Back to portfolio</a>
+  <span class="pfbar__label">Live demo &middot; <b>The Lumen</b></span>
+  <a class="pfbar__all" href="../">All 7 demos</a>
+</div>
+
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>Harbour Quarter &middot; opened 1927, reopened 2021</span>
+    <span class="hide-sm">Best rate guaranteed when you book direct</span>
+    <a href="tel:+15550274100">(555) 027-4100</a>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="brand" href="index.html">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="3.5" y="3.5" width="33" height="33" fill="none" stroke="#16241e" stroke-width="1.4"/><path d="M20 4v32M4 20h32" stroke="#16241e" stroke-width="0.9"/><rect x="21.5" y="5.5" width="13" height="13" fill="#a85f32"/></svg>
+      <span class="brand__text"><span class="brand__name">The Lumen</span><span class="brand__sub">Harbour Quarter</span></span>
+    </a>
+
+    <nav class="mainnav" aria-label="Main">
+      <a href="rooms.html">Rooms &amp; suites</a>
+      <a href="stay.html">The hotel</a>
+      <a href="offers.html" aria-current="page">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="btn btn--sm hide-sm" href="book.html">Check dates</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer">
+        <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="drawer__head">
+      <span class="kicker kicker--quiet">Menu</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="drawer__nav" aria-label="Mobile">
+      <a href="index.html">Home</a>
+      <a href="rooms.html">Rooms &amp; suites</a>
+      <a href="stay.html">The hotel</a>
+      <a href="offers.html" aria-current="page">Offers &amp; rates</a>
+      <a href="contact.html">Find us</a>
+    </nav>
+    <a class="btn btn--block" href="book.html">Check dates</a>
+    <p class="drawer__meta">18 Quay Street, Harbour Quarter<br><a href="tel:+15550274100">(555) 027-4100</a></p>
+  </div>
+</div>
+
+<main id="main">
+
+  <section class="section section--tight section--paper">
+    <div class="wrap">
+      <span class="kicker">Offers &amp; rates</span>
+      <h1 class="mt-3">Three rates, and what they actually mean</h1>
+      <p class="lede mt-4 measure">
+        No tiers, no members-only pricing, no countdown timers. Three rate plans
+        that differ in one respect: what happens when your plans change.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="wrap">
+      <div class="plans" id="plan-cards"></div>
+      <p class="muted mt-5" style="font-size:var(--step--1)">
+        Prices shown against each plan are for a sample two-night midweek stay in
+        a Harbour King, so they compare like for like. Your own dates will differ
+       , every night is priced separately.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">How the price is built</span>
+        <h2>Why Friday costs more than Tuesday</h2>
+        <p>Nothing here is a surprise at checkout, so it may as well be explained up front.</p>
+      </div>
+      <div class="grid grid--2">
+        <div>
+          <h3 style="font-size:var(--step-1)">The season</h3>
+          <dl class="specs mt-4" id="season-table"></dl>
+        </div>
+        <div>
+          <h3 style="font-size:var(--step-1)">The night of the week</h3>
+          <dl class="specs mt-4" id="dow-table"></dl>
+        </div>
+      </div>
+      <div class="notice notice--info mt-6">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p><strong>Both apply, per night.</strong> A Saturday in July is the peak multiplier times the Saturday multiplier, so it is a long way from a Tuesday in February. The booking page shows each night's rate on its own line rather than a single average.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Packages</span>
+        <h2>Four things worth adding</h2>
+      </div>
+      <div class="grid grid--2">
+        <article class="roomcard"><div class="roomcard__body">
+          <h3>Two nights, one dinner</h3>
+          <p class="roomcard__desc">Any two consecutive nights, with dinner for two in the Long Room on one of them. Three courses, not a set menu. Order what you want up to $75 a head.</p>
+          <span class="roomcard__meta">From two nights &middot; add at the desk</span>
+        </div></article>
+        <article class="roomcard"><div class="roomcard__body">
+          <h3>The slow Sunday</h3>
+          <p class="roomcard__desc">Sunday night with a 4pm checkout on the Monday, breakfast for two, and the baths to yourself before 9am. Our quietest night, priced accordingly.</p>
+          <span class="roomcard__meta">Sunday arrivals &middot; all year</span>
+        </div></article>
+        <article class="roomcard"><div class="roomcard__body">
+          <h3>Penthouse, properly</h3>
+          <p class="roomcard__desc">Either penthouse for three nights or more: airport transfers both ways, breakfast daily, and the butler from 7am. Included in the rate, not sold on top of it.</p>
+          <span class="roomcard__meta">Three nights or more &middot; automatic</span>
+        </div></article>
+        <article class="roomcard"><div class="roomcard__body">
+          <h3>The long stay</h3>
+          <p class="roomcard__desc">Seven nights or more takes 15% off the room rate and includes laundry twice a week. Useful if you are working here rather than visiting.</p>
+          <span class="roomcard__meta">Seven nights or more &middot; all room types</span>
+        </div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--sand" id="terms">
+    <div class="wrap wrap--mid">
+      <h2 tabindex="-1">Rate conditions, in plain words</h2>
+      <div class="accordion mt-6">
+        <details open>
+          <summary>Flexible</summary>
+          <div class="accordion__body">
+            <p>Cancel or change free of charge until 6pm the day before you arrive. Nothing is taken until you check out.</p>
+            <p>After 6pm the day before, one night's room rate is charged. That is the only penalty, and it does not grow.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Advance purchase</summary>
+          <div class="accordion__body">
+            <p>18% off, charged in full at the time of booking, and not refundable, including if you don't turn up. Dates cannot be moved.</p>
+            <p>It is genuinely cheaper and genuinely inflexible. If there is any chance your plans will move, the flexible rate will cost you less overall.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Bed &amp; breakfast</summary>
+          <div class="accordion__body">
+            <p>The flexible rate plus breakfast in the Long Room for two, at $32 a night for the pair. Breakfast on the door is $27 each, so it pays for itself with two people.</p>
+            <p>Cancellation is identical to the flexible rate.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Minimum stays and arrival dates</summary>
+          <div class="accordion__body">
+            <p>Friday and Saturday arrivals need two nights all year. In peak season they need three, and a peak Saturday cannot be the first night of a stay at all, that Saturday is held for guests already arriving on the Friday.</p>
+            <p>This is ordinary hotel revenue management, and the booking page says so in those words rather than just refusing the date.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Taxes and the levy</summary>
+          <div class="accordion__body">
+            <p>Occupancy tax is 14.5% of the room rate. The city levy is $4.50 per room per night. Both are shown as separate lines in the total before you enter a name, and neither is a resort fee. We do not charge one.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="index.html">
+          <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="3.5" y="3.5" width="33" height="33" fill="none" stroke="#f6f2e9" stroke-width="1.4"/><path d="M20 4v32M4 20h32" stroke="#f6f2e9" stroke-width="0.9"/><rect x="21.5" y="5.5" width="13" height="13" fill="#c47a48"/></svg>
+          <span class="brand__text"><span class="brand__name">The Lumen</span><span class="brand__sub">Harbour Quarter</span></span>
+        </a>
+        <p class="footer__blurb">A 122-room hotel in a 1927 shipping office, reopened in 2021 with the good bones left alone.</p>
+      </div>
+      <div>
+        <h4>Stay</h4>
+        <ul>
+          <li><a href="rooms.html">Rooms &amp; suites</a></li>
+          <li><a href="rooms.html#penthouses">The penthouses</a></li>
+          <li><a href="offers.html">Offers &amp; rates</a></li>
+          <li><a href="book.html">Check dates</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>The hotel</h4>
+        <ul>
+          <li><a href="stay.html#dining">The Long Room</a></li>
+          <li><a href="stay.html#spa">Baths &amp; gym</a></li>
+          <li><a href="stay.html#meetings">Meetings</a></li>
+          <li><a href="stay.html#quarter">The Quarter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+15550274100">(555) 027-4100</a></li>
+          <li><a href="mailto:stay@thelumen.example">stay@thelumen.example</a></li>
+          <li>18 Quay Street<br>Harbour Quarter</li>
+          <li><a href="contact.html">Directions &amp; FAQs</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; <span data-year>2026</span> The Lumen. Fictional hotel. Portfolio demo.</span>
+      <span>Rates &middot; Privacy &middot; Accessibility</span>
+    </div>
+  </div>
+</footer>
+
+<div class="actionbar">
+  <a class="btn btn--ghost" href="tel:+15550274100">Call</a>
+  <a class="btn" href="book.html">Check dates</a>
+</div>
+
+<script src="assets/js/data.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+<script src="assets/js/offers.js" defer></script>
+</body>
+</html>

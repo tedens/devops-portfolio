@@ -8,7 +8,7 @@ This project provisions a centralized IAM access system across multiple AWS acco
 
 ---
 
-### 🔐 Use Case
+## Use Case
 
 Cross-account access can quickly become a mess of hardcoded IAM users and shared credentials. This setup eliminates that by managing:
 
@@ -18,7 +18,7 @@ Cross-account access can quickly become a mess of hardcoded IAM users and shared
 
 ---
 
-### ⚙️ Components
+## Components
 
 - **IAM Roles** in both management and production accounts
 - **Trust Policies** allowing management to assume production roles
@@ -28,14 +28,14 @@ Cross-account access can quickly become a mess of hardcoded IAM users and shared
 
 ---
 
-### 📂 Structure
+## Structure
 
-- `management/` — Defines SSO permission sets, source IAM role, and assignments
-- `production/` — Defines target IAM role that the management account can assume
+- `management/` defines SSO permission sets, the source IAM role, and assignments
+- `production/` defines the target IAM role that the management account can assume
 
 ---
 
-### 🛠️ Setup Workflow
+## Setup Workflow
 
 1. Deploy `production/` stack first:
    - Creates the `EngineerAccess` role
@@ -47,7 +47,7 @@ Cross-account access can quickly become a mess of hardcoded IAM users and shared
 
 ---
 
-### 📎 Trust Policy Bootstrapping
+## Trust Policy Bootstrapping
 
 To avoid circular dependencies between accounts, the initial trust policy in `production/` uses:
 
@@ -57,7 +57,7 @@ Once both roles are created, you can optionally tighten the trust to the specifi
 
 ---
 
-### 🔧 Terraform Highlights
+## Terraform Highlights
 
 - Provider aliasing for `aws.production` and `aws.management`
 - IAM role + policy creation for both accounts
@@ -67,5 +67,3 @@ Once both roles are created, you can optionally tighten the trust to the specifi
 ---
 
 This project reflects real-world infrastructure governance challenges in growing organizations, and shows how DevOps can drive secure, automated access without friction.
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/07-aws-multi-account-sso)

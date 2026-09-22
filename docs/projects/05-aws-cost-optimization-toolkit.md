@@ -6,7 +6,7 @@ permalink: /05-aws-cost-optimization-toolkit/
 
 This project provides a lightweight AWS cost governance toolkit focused on visibility, automation, and enforcement. It includes Bash scripts and dashboards designed to help teams reduce unnecessary cloud spend and enforce good tagging hygiene across AWS environments.
 
-## 🔍 Key Features
+## Key Features
 
 - **Tag Audit Script:**  
   Scans AWS resources for missing `owner`, `project`, and `env` tags. Includes a `--fix` mode to auto-apply tags using default values.
@@ -20,7 +20,7 @@ This project provides a lightweight AWS cost governance toolkit focused on visib
 - **Optional Slack Alerts:**  
   Integrate with Slack for real-time budget or tag violations.
 
-## 🛠️ Technologies
+## Technologies
 
 - Bash  
 - AWS CLI  
@@ -28,19 +28,17 @@ This project provides a lightweight AWS cost governance toolkit focused on visib
 - Budgets  
 - Terraform (optional for dashboard and budget provisioning)
 
-## 🧩 Example Use Case
+## Example Use Case
 
-You’ve got six AWS accounts with various workloads running — and no single view of cost breakdowns or tag compliance. This toolkit gives you a quick way to:
+You’ve got six AWS accounts with various workloads running, and no single view of cost breakdowns or tag compliance. This toolkit gives you a quick way to:
 
 1. Detect untagged resources
 2. Visualize usage patterns
 3. Alert when things get expensive
 
-## 🚀 Demo
+## Demo
 
 Run the tag audit script:
 ```bash
 ./tag-audit.sh --profile $AWS_PROFILE --env dev
 ```
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/03-iac-terraform)

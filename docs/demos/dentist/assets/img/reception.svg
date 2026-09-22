@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 675" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of the front desk and waiting area">
+  <defs>
+    <linearGradient id="r-wall" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#f7f2ec"/><stop offset="1" stop-color="#efe6db"/>
+    </linearGradient>
+    <linearGradient id="r-desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#11807d"/><stop offset="1" stop-color="#063b3b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="675" fill="url(#r-wall)"/>
+  <rect y="470" width="900" height="205" fill="#e6dacb"/>
+
+  <!-- Back wall panelling -->
+  <g stroke="#e0d3c2" stroke-width="4">
+    <path d="M120 60v410M240 60v410M360 60v410M480 60v410M600 60v410M720 60v410"/>
+  </g>
+
+  <!-- Wordmark plaque -->
+  <g transform="translate(300 96)">
+    <rect width="300" height="104" rx="22" fill="#ffffff" opacity=".92"/>
+    <path d="M150 28c9 0 12 5 19 5 10 0 14 9 13 20-2 16-7 22-9 32-2 8-4 13-9 13s-6-6-8-14c-2-6-4-9-6-9s-4 3-6 9c-2 8-3 14-8 14s-7-5-9-13c-2-10-7-16-9-32-1-11 3-20 13-20 7 0 10-5 19-5z" fill="#1c9c95"/>
+    <text x="150" y="92" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#063b3b">Sherry’s Dentistry</text>
+  </g>
+
+  <!-- Reception desk -->
+  <path d="M170 330h560v140H170z" fill="url(#r-desk)"/>
+  <path d="M150 316h600v28H150z" fill="#eef8f7"/>
+  <path d="M150 316h600v8H150z" fill="#d6ebe9"/>
+
+  <!-- Monitor -->
+  <g transform="translate(560 220)">
+    <rect width="120" height="80" rx="8" fill="#0a5252"/>
+    <rect x="8" y="8" width="104" height="60" rx="4" fill="#7fcac4" opacity=".7"/>
+    <rect x="52" y="80" width="16" height="16" fill="#0a5252"/>
+  </g>
+
+  <!-- Waiting chairs -->
+  <g transform="translate(70 396)">
+    <rect x="0" y="0" width="86" height="60" rx="16" fill="#e2a78c"/>
+    <rect x="8" y="56" width="10" height="34" rx="5" fill="#b98a72"/>
+    <rect x="68" y="56" width="10" height="34" rx="5" fill="#b98a72"/>
+  </g>
+  <g transform="translate(750 396)">
+    <rect x="0" y="0" width="86" height="60" rx="16" fill="#e2a78c"/>
+    <rect x="8" y="56" width="10" height="34" rx="5" fill="#b98a72"/>
+    <rect x="68" y="56" width="10" height="34" rx="5" fill="#b98a72"/>
+  </g>
+
+  <!-- Plant -->
+  <g transform="translate(838 300)">
+    <path d="M12 160V90" stroke="#2f6b56" stroke-width="6" stroke-linecap="round"/>
+    <path d="M14 92C-14 80-24 52-18 24c28 4 44 28 46 58z" fill="#3d8a6d"/>
+    <path d="M18 104c28-16 36-46 28-72-28 8-44 32-44 62z" fill="#4fa384"/>
+    <path d="M-12 160h50l-8 62h-34z" fill="#c9a488"/>
+  </g>
+
+  <!-- Pendant lights -->
+  <g stroke="#c9dedb" stroke-width="5" fill="#ffffff">
+    <path d="M300 0v70"/><circle cx="300" cy="84" r="16"/>
+    <path d="M450 0v52"/><circle cx="450" cy="66" r="16"/>
+    <path d="M600 0v70"/><circle cx="600" cy="84" r="16"/>
+  </g>
+</svg>

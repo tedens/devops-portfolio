@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Stylised map of the Riverside Commons office at 214 Mill Street">
+  <rect width="600" height="420" fill="#eef8f7"/>
+  <!-- park -->
+  <path d="M0 250h150v170H0z" fill="#dfeedd"/>
+  <!-- river -->
+  <path d="M-20 60c110 40 150 130 300 150s220 90 340 120" stroke="#bfe0e6" stroke-width="42" fill="none" stroke-linecap="round"/>
+  <!-- blocks -->
+  <g fill="#e4ece9">
+    <rect x="180" y="40" width="130" height="90" rx="6"/>
+    <rect x="340" y="40" width="120" height="90" rx="6"/>
+    <rect x="480" y="40" width="110" height="90" rx="6"/>
+    <rect x="180" y="170" width="130" height="80" rx="6"/>
+    <rect x="340" y="170" width="120" height="80" rx="6"/>
+    <rect x="200" y="300" width="150" height="100" rx="6"/>
+    <rect x="390" y="290" width="180" height="110" rx="6"/>
+  </g>
+  <!-- roads -->
+  <g stroke="#ffffff" stroke-width="16" stroke-linecap="square">
+    <path d="M160 0v420M325 0v420M470 0v420"/>
+    <path d="M0 150h600M0 270h600"/>
+  </g>
+  <g stroke="#f4d9a5" stroke-width="20">
+    <path d="M0 150h600"/>
+  </g>
+  <!-- labels -->
+  <g font-family="Inter, system-ui, sans-serif" font-size="13" fill="#6b7d7b">
+    <text x="14" y="142">Mill St</text>
+    <text x="14" y="262">Harbour Rd</text>
+    <text x="336" y="24">Commons Ave</text>
+    <text x="16" y="330">Riverside Park</text>
+  </g>
+  <!-- pin -->
+  <g transform="translate(325 150)">
+    <circle r="30" fill="#1c9c95" opacity=".18"/>
+    <path d="M0-30a22 22 0 0 1 22 22c0 16-22 38-22 38S-22 8-22-8A22 22 0 0 1 0-30z" fill="#0d6767"/>
+    <circle cy="-8" r="8" fill="#ffffff"/>
+  </g>
+</svg>

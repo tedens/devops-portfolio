@@ -1,0 +1,38 @@
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__grid">
+      <div>
+        <a class="brand" href="{{ site.baseurl }}/">
+          <span class="brand__mark" aria-hidden="true">AE</span>
+          <span class="brand__text">
+            <span class="brand__name">{{ site.title }}</span>
+            <span class="brand__role">{{ site.tagline }}</span>
+          </span>
+        </a>
+        <p class="site-footer__blurb">Platform and DevOps engineering, and the occasional full product. Open to part-time contracts and advisory work.</p>
+      </div>
+      <div>
+        <h4>Projects</h4>
+        <ul>
+          {%- assign featured = site.data.projects | where: "featured", true -%}
+          {%- for p in featured limit: 4 -%}
+          <li><a href="{{ site.baseurl }}{{ p.path }}">{{ p.title }}</a></li>
+          {%- endfor -%}
+          <li><a href="{{ site.baseurl }}/projects/">All projects</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Elsewhere</h4>
+        <ul>
+          <li><a href="{{ site.github_repo }}" rel="noopener">GitHub</a></li>
+          <li><a href="{{ site.linkedin }}" rel="noopener">LinkedIn</a></li>
+          <li><a href="{{ site.baseurl }}/contact/">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>&copy; {{ site.time | date: "%Y" }} {{ site.author }}</span>
+      <span>Built with Jekyll, deployed by GitHub Actions to GitHub Pages.</span>
+    </div>
+  </div>
+</footer>

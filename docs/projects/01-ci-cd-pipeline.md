@@ -5,18 +5,16 @@ permalink: /01-ci-cd-pipeline/
 ---
 This project demonstrates a basic CI/CD workflow using GitHub Actions for a Node.js + Docker application.
 
-### 🔧 Tools
+## Tools
 - GitHub Actions
 - Docker / Docker Compose
 
-### ✅ Features
+## Features
 - Lint/test/build pipeline on push to `main`
 - Dockerized local development
 - GitHub Actions workflow stored in `.github/workflows/ci.yml`
 
-### 📂 Repo Highlights
+## Repo Highlights
 - `Dockerfile`, `docker-compose.yml`
 - `.github/workflows/ci.yml`
 - `src/index.js` (Node.js app)
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/01-ci-cd-pipeline)

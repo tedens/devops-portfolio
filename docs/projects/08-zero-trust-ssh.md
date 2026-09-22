@@ -6,13 +6,13 @@ permalink: /08-zero-trust-ssh/
 
 This project implements a modern, zero-trust SSH gateway using Teleport, replacing traditional SSH key-based access with short-lived certificates, GitHub SSO integration, and full session audit logging to CloudWatch.
 
-### 🔐 Use Case
+## Use Case
 
 Managing long-lived SSH keys at scale is error-prone and insecure. This project demonstrates how to eliminate static credentials entirely, enforce role-based access with your GitHub org, and maintain audit compliance through real-time log forwarding.
 
 ---
 
-### ⚙️ Components
+## Components
 
 - Teleport OSS: Access proxy, SSH server, and certificate authority all in one
 - Terraform: Provisions a secure VPC, subnet, security group, and EC2 bastion
@@ -21,7 +21,7 @@ Managing long-lived SSH keys at scale is error-prone and insecure. This project 
 
 ---
 
-### 📂 Project Structure
+## Project Structure
 
 - terraform/: Infrastructure code for VPC, EC2, and security group
 - teleport.yaml: Main configuration file enabling auth, proxy, and SSH services
@@ -30,7 +30,7 @@ Managing long-lived SSH keys at scale is error-prone and insecure. This project 
 
 ---
 
-### 🛠 Setup Steps
+## Setup Steps
 
 1. Deploy infrastructure with Terraform:
 
@@ -62,7 +62,7 @@ Open https://<bastion-public-ip>/ and authenticate with GitHub
 
 ---
 
-### ✅ Security & Audit Features
+## Security & Audit Features
 
 - No static SSH keys
 - GitHub SSO for identity and role mapping
@@ -72,7 +72,7 @@ Open https://<bastion-public-ip>/ and authenticate with GitHub
 
 ---
 
-### 📚 Extend This Project
+## Extend This Project
 
 - Enable S3 archiving for long-term session log storage
 - Set up per-node RBAC with label matching
@@ -83,5 +83,3 @@ Open https://<bastion-public-ip>/ and authenticate with GitHub
 ---
 
 This project reflects a shift toward secure, scalable access control in production-grade environments, with a focus on visibility, traceability, and audit readiness.
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/08-zero-trust-ssh)

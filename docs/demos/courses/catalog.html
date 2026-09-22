@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browse courses · Coursefolk</title>
+<meta name="description" content="Browse every course on Coursefolk. Filter by subject, level and price, and preview two lessons of anything before you buy.">
+<meta name="theme-color" content="#1a1230">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%235b3fd6'/%3E%3Cpath d='M22 38l28-14 28 14-28 14z' fill='%23fff'/%3E%3Cpath d='M34 46v16c0 5 7 9 16 9s16-4 16-9V46' fill='none' stroke='%23fff' stroke-width='7'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="../portfolio-bar.css">
+</head>
+<body>
+<div class="pfbar">
+  <a class="pfbar__back" href="../../14-niche-web-design/"><span aria-hidden="true">&larr;</span> Back to portfolio</a>
+  <span class="pfbar__label">Live demo &middot; <b>Coursefolk</b></span>
+  <a class="pfbar__all" href="../">All 7 demos</a>
+</div>
+
+
+<a class="skip-link" href="#results">Skip to results</a>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html">
+      <svg class="brand__mark" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" rx="26" fill="#5b3fd6"/>
+        <path d="M22 38l28-14 28 14-28 14z" fill="#fff"/>
+        <path d="M34 46v16c0 5 7 9 16 9s16-4 16-9V46" fill="none" stroke="#fff" stroke-width="7"/>
+      </svg>
+      <span class="brand__name">Coursefolk</span>
+    </a>
+
+    <form class="hsearch" role="search" data-search-form>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" placeholder="Search courses, topics, instructors" aria-label="Search courses">
+    </form>
+
+    <nav class="hnav" aria-label="Main">
+      <a href="catalog.html" aria-current="page">Browse</a>
+      <a href="teach.html">Teach</a>
+      <a href="dashboard.html">My learning</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="icon-btn" href="checkout.html" aria-label="Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.6 11.4A2 2 0 0 0 9.6 17h7.9a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
+        <span class="icon-btn__badge" data-cart-badge hidden>0</span>
+      </a>
+      <a class="btn btn--sm btn--ghost" href="signin.html" data-when-signed-out>Sign in</a>
+      <a class="icon-btn" href="dashboard.html" data-when-signed-in hidden aria-label="Your dashboard">
+        <span class="avatar avatar--sm" data-user-initials>YOU</span>
+      </a>
+      <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="drawer">
+        <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">Open menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="msearch">
+    <form class="hsearch" role="search" data-search-form>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" placeholder="Search courses" aria-label="Search courses">
+    </form>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div class="drawer__head">
+      <span class="brand__name">Menu</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="drawer__nav" aria-label="Mobile">
+      <a href="catalog.html" aria-current="page">Browse courses</a>
+      <a href="dashboard.html">My learning</a>
+      <a href="teach.html">Teach on Coursefolk</a>
+      <a href="upload.html">Upload a course</a>
+      <a href="checkout.html">Cart</a>
+    </nav>
+    <a class="btn btn--block" href="signin.html" data-when-signed-out>Sign in</a>
+    <div data-when-signed-in hidden>
+      <p class="muted" style="font-size:.9rem">Signed in as <strong data-user-name>You</strong> · <span data-user-role>Learner</span></p>
+      <button class="btn btn--quiet btn--block mt-3" type="button" data-sign-out>Sign out</button>
+    </div>
+    <p class="drawer__meta">Fictional marketplace. Portfolio demo.</p>
+  </div>
+</div>
+
+<main>
+
+  <section class="pagehead">
+    <div class="container">
+      <ol class="breadcrumb">
+        <li><a href="index.html">Home</a></li>
+        <li>Browse</li>
+      </ol>
+      <h1 id="catalog-title">Every course</h1>
+      <p id="catalog-sub">Filter it down, or just scroll. Two lessons of each are free to preview.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="with-rail with-rail--left">
+
+        <!-- Filters -->
+        <form id="filters" aria-label="Filter courses">
+          <details class="panel" id="filter-shell" open>
+            <summary class="summary-toggle">
+              Filters
+              <span class="tag tag--quiet" id="filter-count" hidden>0</span>
+            </summary>
+
+            <div style="display:grid;gap:var(--sp-6);margin-top:var(--sp-5)">
+              <fieldset>
+                <legend class="legend">Subject</legend>
+                <div class="chips mt-3" id="f-cats"></div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="legend">Level</legend>
+                <div class="chips mt-3" id="f-levels"></div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="legend">Price</legend>
+                <div class="chips mt-3" id="f-price">
+                  <button class="chip" type="button" data-price="all" aria-pressed="true">Any</button>
+                  <button class="chip" type="button" data-price="free" aria-pressed="false">Free</button>
+                  <button class="chip" type="button" data-price="paid" aria-pressed="false">Paid</button>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="legend">Rating</legend>
+                <div class="chips mt-3" id="f-rating">
+                  <button class="chip" type="button" data-rating="0" aria-pressed="true">Any</button>
+                  <button class="chip" type="button" data-rating="4.5" aria-pressed="false">4.5 &amp; up</button>
+                  <button class="chip" type="button" data-rating="4.8" aria-pressed="false">4.8 &amp; up</button>
+                </div>
+              </fieldset>
+
+              <button class="btn btn--quiet btn--block" type="button" id="f-clear">Clear all filters</button>
+            </div>
+          </details>
+        </form>
+
+        <!-- Results -->
+        <div>
+          <div class="flex-between" style="margin-bottom:var(--sp-5)">
+            <p aria-live="polite" id="result-count" class="muted"></p>
+            <div class="field" style="min-width:210px">
+              <label class="visually-hidden" for="sort">Sort results</label>
+              <select class="select" id="sort">
+                <option value="popular">Most popular</option>
+                <option value="rating">Highest rated</option>
+                <option value="new">Recently updated</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid--3" id="results"></div>
+
+          <div id="empty" hidden>
+            <div class="empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <h3>Nothing matches that</h3>
+              <p>Try a broader search, or clear a filter or two.</p>
+              <button class="btn btn--ghost mt-5" type="button" id="empty-clear">Clear all filters</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="index.html">
+          <svg class="brand__mark" viewBox="0 0 100 100" aria-hidden="true">
+            <rect width="100" height="100" rx="26" fill="#ffffff" fill-opacity=".14"/>
+            <path d="M22 38l28-14 28 14-28 14z" fill="#fff"/>
+            <path d="M34 46v16c0 5 7 9 16 9s16-4 16-9V46" fill="none" stroke="#fff" stroke-width="7"/>
+          </svg>
+          <span class="brand__name">Coursefolk</span>
+        </a>
+        <p class="footer__blurb">A marketplace for deep, specific courses taught by the people who do the work.</p>
+      </div>
+      <div>
+        <h4>Learn</h4>
+        <ul>
+          <li><a href="catalog.html">Browse courses</a></li>
+          <li><a href="dashboard.html">My learning</a></li>
+          <li><a href="checkout.html">Cart</a></li>
+          <li><a href="signin.html">Sign in</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Teach</h4>
+        <ul>
+          <li><a href="teach.html">How it works</a></li>
+          <li><a href="teach.html#calculator">Earnings calculator</a></li>
+          <li><a href="upload.html">Upload a course</a></li>
+          <li><a href="teach.html#payouts">Payouts</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Subjects</h4>
+        <ul>
+          <li><a href="catalog.html?cat=Development">Development</a></li>
+          <li><a href="catalog.html?cat=Design">Design</a></li>
+          <li><a href="catalog.html?cat=Data">Data</a></li>
+          <li><a href="catalog.html?cat=Writing">Writing</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; <span data-year>2026</span> Coursefolk. Fictional marketplace. Portfolio demo.</span>
+      <span>Terms · Privacy · Instructor agreement</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/data.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+</body>
+</html>

@@ -1,59 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ page.title }}</title>
-    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <nav class="main-nav">
-        <a class="nav-link" href="{{ site.baseurl }}">🏠 Home</a>
-        <div class="dropdown">
-          <button class="dropdown-button">Projects ▾</button>
-          <div class="dropdown-content">
-            <div class="dropdown-section">
-              <div class="dropdown-label">Open Source Projects</div>
-              <a class="dropdown-item" href="{{ site.baseurl }}/11-acm-manager/">ACM Manager</a>
+---
+layout: default
+---
+{%- comment -%}
+  Project pages keep their existing front matter (title + permalink). Their
+  metadata is looked up from _data/projects.yaml by permalink, so a project
+  is described in exactly one place and the page header, the cards, the nav
+  and the filters can never disagree.
+{%- endcomment -%}
+{%- assign proj = site.data.projects | where: "path", page.url | first -%}
+{%- assign list = site.data.projects -%}
+{%- for p in list -%}{%- if p.path == page.url -%}{%- assign idx = forloop.index0 -%}{%- endif -%}{%- endfor -%}
+{%- if proj -%}
+  {%- assign previdx = idx | minus: 1 -%}
+  {%- assign nextidx = idx | plus: 1 -%}
+  {%- if idx > 0 -%}{%- assign prevp = list[previdx] -%}{%- endif -%}
+  {%- if nextidx < list.size -%}{%- assign nextp = list[nextidx] -%}{%- endif -%}
+{%- endif -%}
 
-            </div>
-            <div class="dropdown-section">
-              <div class="dropdown-label">CI/CD & Deployment</div>
-              <a class="dropdown-item" href="{{ site.baseurl }}/01-ci-cd-pipeline/">Jenkins CI/CD</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/02-k8s-local-env/">App Deploy (Local K8s)</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/09-karpenter-spot-nodes">Karpenter K8s (Spot Nodes)</a>
-            </div>
-            <div class="dropdown-section">
-              <div class="dropdown-label">Infrastructure as Code</div>
-              <a class="dropdown-item" href="{{ site.baseurl }}/03-iac-terraform/">Terraform IaC</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/05-aws-cost-optimization-toolkit/">AWS Cost Toolkit</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/07-aws-multi-account-sso">Multi-Account AWS (SSO)</a>
-
-            </div>
-            <div class="dropdown-section">
-              <div class="dropdown-label">Monitoring & Ops</div>
-              <a class="dropdown-item" href="{{ site.baseurl }}/04-monitoring-logging/">Metrics and Monitoring</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/10-automated-dr-sim">Automated Disaster Recovery</a>
-            </div>
-            <div class="dropdown-section">
-              <div class="dropdown-label">Security</div>
-              <a class="dropdown-item" href="{{ site.baseurl }}/06-secrets-rotation/">Secrets Auto-Rotation</a>
-              <a class="dropdown-item" href="{{ site.baseurl }}/08-zero-trust-ssh">Zero-Trust SSH Access</a>
-            </div>
-          </div>
-        </div>
-        <a class="nav-link" href="https://linkedin.com/in/tjedens" target="_blank">LinkedIn Profile</a>
-        <a class="dropdown-item" href="{{ site.baseurl }}/contact">Contact Me</a>
-      </nav>
-      <main>
-        {% if page.title %}
-          <header>
-            <h1>{{ page.title }}</h1>
-          </header>
-        {% endif %}
-        {{ content }}
-      </main>
+{%- if proj -%}
+<nav class="backbar" aria-label="Project navigation">
+  <div class="wrap backbar__inner">
+    <a class="backbar__back" href="{{ site.baseurl }}/projects/">
+      <span class="backbar__arrow" aria-hidden="true">&larr;</span>
+      <span>All projects</span>
+    </a>
+    <div class="backbar__sib">
+      {%- if prevp -%}
+      <a class="backbar__link" href="{{ site.baseurl }}{{ prevp.path }}" aria-label="Previous project: {{ prevp.title }}">
+        <span aria-hidden="true">&larr;</span>
+        <span class="backbar__label">Previous</span>
+        <span class="backbar__name">{{ prevp.title }}</span>
+      </a>
+      {%- endif -%}
+      {%- if nextp -%}
+      <a class="backbar__link backbar__link--next" href="{{ site.baseurl }}{{ nextp.path }}" aria-label="Next project: {{ nextp.title }}">
+        <span class="backbar__label">Next</span>
+        <span class="backbar__name">{{ nextp.title }}</span>
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+      {%- endif -%}
     </div>
-  </body>
-</html>
+  </div>
+</nav>
+{%- endif -%}
+
+<div class="page-head">
+  <div class="wrap">
+    {%- if proj -%}
+      <p class="crumb">{{ proj.category }}</p>
+      <h1>{{ page.title | default: proj.title }}</h1>
+      <div class="page-head__meta">
+        <span class="status{% if proj.status != 'live' %} status--{{ proj.status }}{% endif %}">{{ proj.status }}</span>
+        {%- for t in proj.stack -%}<span class="chip">{{ t }}</span>{%- endfor -%}
+      </div>
+      <p class="page-head__sum">{{ proj.summary }}</p>
+      <div class="btn-row">
+        {%- if proj.demo -%}<a class="btn" href="{{ site.baseurl }}{{ proj.demo }}">Open the live demo</a>{%- endif -%}
+        {%- if proj.repo -%}<a class="btn btn--ghost" href="{{ proj.repo }}" rel="noopener">View the code</a>{%- endif -%}
+      </div>
+    {%- else -%}
+      {%- if page.title -%}<h1>{{ page.title }}</h1>{%- endif -%}
+      {%- if page.summary -%}<p class="page-head__sum">{{ page.summary }}</p>{%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="prose">
+    {{ content }}
+  </div>
+</div>
+
+{%- if proj -%}
+{%- assign others = site.data.projects | where_exp: "p", "p.path != page.url" -%}
+<section class="section section--edge">
+  <div class="wrap">
+    <div class="head-row"><h2 style="font-size:var(--step-3)">More work</h2>
+      <a href="{{ site.baseurl }}/projects/">All projects &rarr;</a></div>
+    <div class="cards cards--3">
+      {%- for p in others limit: 3 -%}{% include project-card.html project=p %}{%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}

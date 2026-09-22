@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Lumen · A hotel in the Harbour Quarter</title>
+<meta name="description" content="A 122-room hotel in a 1927 shipping office. Six room types and two penthouses, with every night of your stay priced and checked separately.">
+<meta name="theme-color" content="#1d3a2e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2316241e'/%3E%3Cpath d='M20 6v28M6 20h28' stroke='%23f6f2e9' stroke-width='1.2'/%3E%3Crect x='21.5' y='7.5' width='11' height='11' fill='%23c47a48'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="../portfolio-bar.css">
+</head>
+<body>
+<div class="pfbar">
+  <a class="pfbar__back" href="../../14-niche-web-design/"><span aria-hidden="true">&larr;</span> Back to portfolio</a>
+  <span class="pfbar__label">Live demo &middot; <b>The Lumen</b></span>
+  <a class="pfbar__all" href="../">All 7 demos</a>
+</div>
+
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>Harbour Quarter &middot; opened 1927, reopened 2021</span>
+    <span class="hide-sm">Best rate guaranteed when you book direct</span>
+    <a href="tel:+15550274100">(555) 027-4100</a>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="brand" href="index.html">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="3.5" y="3.5" width="33" height="33" fill="none" stroke="#16241e" stroke-width="1.4"/><path d="M20 4v32M4 20h32" stroke="#16241e" stroke-width="0.9"/><rect x="21.5" y="5.5" width="13" height="13" fill="#a85f32"/></svg>
+      <span class="brand__text"><span class="brand__name">The Lumen</span><span class="brand__sub">Harbour Quarter</span></span>
+    </a>
+
+    <nav class="mainnav" aria-label="Main">
+      <a href="rooms.html">Rooms &amp; suites</a>
+      <a href="stay.html">The hotel</a>
+      <a href="offers.html">Offers</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <div class="header__actions">
+      <a class="btn btn--sm hide-sm" href="book.html">Check dates</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="drawer">
+        <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__scrim" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="drawer__head">
+      <span class="kicker kicker--quiet">Menu</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="drawer__nav" aria-label="Mobile">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="rooms.html">Rooms &amp; suites</a>
+      <a href="stay.html">The hotel</a>
+      <a href="offers.html">Offers &amp; rates</a>
+      <a href="contact.html">Find us</a>
+    </nav>
+    <a class="btn btn--block" href="book.html">Check dates</a>
+    <p class="drawer__meta">18 Quay Street, Harbour Quarter<br><a href="tel:+15550274100">(555) 027-4100</a></p>
+  </div>
+</div>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="hero__bg">
+      <img src="assets/img/terrace-penthouse-room.jpg" alt="" loading="eager" width="1500" height="938">
+    </div>
+    <div class="wrap hero__inner">
+      <span class="kicker kicker--light">Harbour Quarter</span>
+      <h1>A room with the whole harbour in it.</h1>
+      <p class="hero__lede">
+        One hundred and twenty-two rooms in a 1927 shipping office. Six floors of
+        glass facing the water, two penthouses on the eighteenth, and a bar that
+        stays open as long as anyone is still talking.
+      </p>
+      
+      <form class="searchbar" data-searchbar>
+        <div class="searchbar__grid">
+          <div class="field">
+            <label for="hero-checkin">Check in</label>
+            <input class="input" type="date" id="hero-checkin" name="checkin" required>
+          </div>
+          <div class="field">
+            <label for="hero-checkout">Check out</label>
+            <input class="input" type="date" id="hero-checkout" name="checkout" required>
+          </div>
+          <div class="field">
+            <label for="hero-adults">Adults</label>
+            <div class="stepper">
+              <button class="stepper__btn" type="button" data-guest="adults" data-delta="-1" aria-label="One fewer adult">&minus;</button>
+              <output id="hero-adults" data-out="adults" aria-label="Adults">2</output>
+              <button class="stepper__btn" type="button" data-guest="adults" data-delta="1" aria-label="One more adult">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="hero-children">Children</label>
+            <div class="stepper">
+              <button class="stepper__btn" type="button" data-guest="children" data-delta="-1" aria-label="One fewer child">&minus;</button>
+              <output id="hero-children" data-out="children" aria-label="Children">0</output>
+              <button class="stepper__btn" type="button" data-guest="children" data-delta="1" aria-label="One more child">+</button>
+            </div>
+          </div>
+          <button class="btn" type="submit">Check dates</button>
+        </div>
+        <p class="searchbar__note" data-searchnote></p>
+      </form>
+
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <span class="kicker">The building</span>
+          <h2 class="mt-3">Left alone where it mattered</h2>
+          <p class="lede mt-5">
+            The Lumen was the Harbour Board's shipping office, built in 1927 and
+            empty for thirty-one years. We kept the terrazzo, the brass, the
+            lift dials and the ridiculous ceiling heights, and put glass where
+            the loading doors used to be.
+          </p>
+          <p class="mt-4 muted">
+            What that means as a guest: the rooms are taller than they are new,
+            the windows actually open on the lower floors, and the walls between
+            rooms are 1927 concrete rather than 2021 plasterboard. You will not
+            hear your neighbour.
+          </p>
+          <div class="btn-row mt-6">
+            <a class="btn btn--outline" href="stay.html">About the hotel</a>
+            <a class="btn btn--ghost" href="rooms.html">See the rooms</a>
+          </div>
+        </div>
+        <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+          <div><div class="stat__num">122</div><div class="stat__label">rooms and suites</div></div>
+          <div><div class="stat__num">18</div><div class="stat__label">floors</div></div>
+          <div><div class="stat__num">2</div><div class="stat__label">penthouses, both one of a kind</div></div>
+          <div><div class="stat__num">1927</div><div class="stat__label">the year of the building</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="wrap">
+      <div class="head-row">
+        <div>
+          <span class="kicker">Rooms</span>
+          <h2 class="mt-3">Six ways to stay</h2>
+        </div>
+        <a class="link-arrow" href="rooms.html">All rooms and suites</a>
+      </div>
+      <div class="grid grid--3" id="home-rooms"></div>
+      <p class="muted mt-6" style="font-size:var(--step--1)">
+        Rates shown are the lowest nightly rate in the next ninety days, before
+        tax. What you actually pay depends on the nights you pick.
+        <a href="book.html">Check your dates</a> and every night is priced
+        separately.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <span class="kicker kicker--light">Booking here</span>
+          <h2 class="mt-3">We show you the nights, not just a price</h2>
+          <p class="mt-5">
+            A hotel room is not free or taken. It is free or taken
+            <em>on each night</em>. Most booking forms hide that and simply tell
+            you &ldquo;no availability&rdquo;. Ours shows you every night of your
+            stay, what each one costs, and exactly which night is the problem
+            when there is one.
+          </p>
+          <ul class="checklist mt-6">
+            <li>Every night of the stay priced separately, because Friday is not Tuesday</li>
+            <li>When a room is full on one night of four, we say which night</li>
+            <li>Minimum stays and closed arrival dates explained, not just enforced</li>
+            <li>Taxes and the city levy in the total before you give us a name</li>
+          </ul>
+          <div class="btn-row mt-6">
+            <a class="btn" href="book.html">Check your dates</a>
+          </div>
+        </div>
+        <div>
+          <img src="assets/img/observatory-penthouse-plan3d.jpg" alt="Cutaway view of the Observatory Penthouse, showing the layout from above." loading="lazy" width="1200" height="900" style="border:1px solid rgba(246,242,233,.18)">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="wrap">
+      <div class="section-head section-head--center">
+        <span class="kicker">The hotel</span>
+        <h2>What else is in the building</h2>
+      </div>
+      <div class="grid grid--3">
+        <article class="roomcard" data-reveal>
+          <div class="roomcard__body">
+            <h3>The Long Room</h3>
+            <p class="roomcard__desc">The old telegraph hall, now sixty covers and a twelve-metre bar. Breakfast until 11, dinner until late, and the kitchen will still feed you at 10:45pm.</p>
+            <span class="roomcard__meta">Ground floor &middot; 7am&ndash;midnight</span>
+          </div>
+        </article>
+        <article class="roomcard" data-reveal>
+          <div class="roomcard__body">
+            <h3>The Baths</h3>
+            <p class="roomcard__desc">A 16-metre pool in the old strongroom, a steam room, and a gym that is open all night because that is when half of you use it.</p>
+            <span class="roomcard__meta">Lower ground &middot; 24 hours</span>
+          </div>
+        </article>
+        <article class="roomcard" data-reveal>
+          <div class="roomcard__body">
+            <h3>The Chart Room</h3>
+            <p class="roomcard__desc">One meeting room, not a floor of them. Seats fourteen, has daylight on two sides, and the coffee is the same coffee we serve downstairs.</p>
+            <span class="roomcard__meta">Second floor &middot; by arrangement</span>
+          </div>
+        </article>
+      </div>
+      <p class="text-center mt-7"><a class="link-arrow" href="stay.html">More about the hotel</a></p>
+    </div>
+  </section>
+
+  <section class="section section--sand">
+    <div class="wrap wrap--mid text-center">
+      <span class="kicker">Ready when you are</span>
+      <h2 class="mt-3">Check your dates</h2>
+      <p class="mt-4 measure muted" style="margin-inline:auto">
+        Two minutes, no account, and the total you see includes tax and the city levy.
+      </p>
+      <p class="btn-row mt-6" style="justify-content:center">
+        <a class="btn btn--lg" href="book.html">Check availability</a>
+        <a class="btn btn--lg btn--outline" href="offers.html">See the offers</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="index.html">
+          <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="3.5" y="3.5" width="33" height="33" fill="none" stroke="#f6f2e9" stroke-width="1.4"/><path d="M20 4v32M4 20h32" stroke="#f6f2e9" stroke-width="0.9"/><rect x="21.5" y="5.5" width="13" height="13" fill="#c47a48"/></svg>
+          <span class="brand__text"><span class="brand__name">The Lumen</span><span class="brand__sub">Harbour Quarter</span></span>
+        </a>
+        <p class="footer__blurb">A 122-room hotel in a 1927 shipping office, reopened in 2021 with the good bones left alone.</p>
+      </div>
+      <div>
+        <h4>Stay</h4>
+        <ul>
+          <li><a href="rooms.html">Rooms &amp; suites</a></li>
+          <li><a href="rooms.html#penthouses">The penthouses</a></li>
+          <li><a href="offers.html">Offers &amp; rates</a></li>
+          <li><a href="book.html">Check dates</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>The hotel</h4>
+        <ul>
+          <li><a href="stay.html#dining">The Long Room</a></li>
+          <li><a href="stay.html#spa">Baths &amp; gym</a></li>
+          <li><a href="stay.html#meetings">Meetings</a></li>
+          <li><a href="stay.html#quarter">The Quarter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+15550274100">(555) 027-4100</a></li>
+          <li><a href="mailto:stay@thelumen.example">stay@thelumen.example</a></li>
+          <li>18 Quay Street<br>Harbour Quarter</li>
+          <li><a href="contact.html">Directions &amp; FAQs</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; <span data-year>2026</span> The Lumen. Fictional hotel. Portfolio demo.</span>
+      <span>Rates &middot; Privacy &middot; Accessibility</span>
+    </div>
+  </div>
+</footer>
+
+<div class="actionbar">
+  <a class="btn btn--ghost" href="tel:+15550274100">Call</a>
+  <a class="btn" href="book.html">Check dates</a>
+</div>
+
+<script src="assets/js/data.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+<script src="assets/js/home.js" defer></script>
+</body>
+</html>

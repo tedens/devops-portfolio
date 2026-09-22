@@ -1,0 +1,40 @@
+{%- assign nav = "Projects,/projects/|About,/about/|Contact,/contact/" | split: "|" -%}
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ site.baseurl }}/">
+      <span class="brand__mark" aria-hidden="true">AE</span>
+      <span class="brand__text">
+        <span class="brand__name">{{ site.title }}</span>
+        <span class="brand__role">{{ site.tagline }}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      {%- for item in nav -%}
+        {%- assign bits = item | split: "," -%}
+        <a href="{{ site.baseurl }}{{ bits[1] }}"{% if page.url == bits[1] %} aria-current="page"{% endif %}>{{ bits[0] }}</a>
+      {%- endfor -%}
+      <a href="{{ site.github_repo }}" rel="noopener">GitHub</a>
+    </nav>
+
+    <div class="site-header__actions">
+      <a class="btn btn--sm" href="{{ site.baseurl }}/contact/">Get in touch</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav">
+        <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobile-nav">
+  <nav class="wrap" aria-label="Mobile">
+    <a href="{{ site.baseurl }}/"{% if page.url == "/" %} aria-current="page"{% endif %}>Home</a>
+    {%- for item in nav -%}
+      {%- assign bits = item | split: "," -%}
+      <a href="{{ site.baseurl }}{{ bits[1] }}"{% if page.url == bits[1] %} aria-current="page"{% endif %}>{{ bits[0] }}</a>
+    {%- endfor -%}
+    <a href="{{ site.github_repo }}" rel="noopener">GitHub</a>
+    <a href="{{ site.linkedin }}" rel="noopener">LinkedIn</a>
+  </nav>
+</div>

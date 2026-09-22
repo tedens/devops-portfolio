@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 675" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of the comfort kit: blanket, headphones, tea and a weighted eye pillow">
+  <defs>
+    <linearGradient id="c-bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#f7f2ec"/><stop offset="1" stop-color="#dcf0ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="675" fill="url(#c-bg)"/>
+
+  <!-- table -->
+  <rect y="470" width="900" height="205" fill="#e2d5c6"/>
+  <rect y="470" width="900" height="12" fill="#d3c2ae"/>
+
+  <!-- folded blanket -->
+  <g transform="translate(70 300)">
+    <rect width="300" height="54" rx="14" fill="#e2a78c"/>
+    <rect y="50" width="300" height="54" rx="14" fill="#d9926f"/>
+    <rect y="100" width="300" height="60" rx="14" fill="#e2a78c"/>
+    <g stroke="#f6e0d3" stroke-width="5" opacity=".7">
+      <path d="M40 0v160M110 0v160M180 0v160M250 0v160"/>
+    </g>
+  </g>
+
+  <!-- headphones -->
+  <g transform="translate(470 250)">
+    <path d="M0 110a110 110 0 0 1 220 0" fill="none" stroke="#0d6767" stroke-width="22" stroke-linecap="round"/>
+    <rect x="-22" y="100" width="54" height="94" rx="26" fill="#11807d"/>
+    <rect x="188" y="100" width="54" height="94" rx="26" fill="#11807d"/>
+    <rect x="-10" y="116" width="30" height="62" rx="15" fill="#7fcac4"/>
+    <rect x="200" y="116" width="30" height="62" rx="15" fill="#7fcac4"/>
+  </g>
+
+  <!-- tea cup -->
+  <g transform="translate(150 360)">
+    <path d="M0 40h120v42a42 42 0 0 1-42 42H42A42 42 0 0 1 0 82z" fill="#ffffff"/>
+    <path d="M120 52h18a24 24 0 0 1 0 48h-18z" fill="none" stroke="#ffffff" stroke-width="12"/>
+    <ellipse cx="60" cy="40" rx="60" ry="14" fill="#efe6db"/>
+    <ellipse cx="60" cy="40" rx="46" ry="9" fill="#c88a55"/>
+    <g stroke="#c9dedb" stroke-width="6" fill="none" stroke-linecap="round" opacity=".9">
+      <path d="M36 16c8-12-8-20 0-32"/>
+      <path d="M62 10c8-12-8-20 0-32"/>
+      <path d="M88 16c8-12-8-20 0-32"/>
+    </g>
+  </g>
+
+  <!-- eye pillow -->
+  <g transform="translate(560 470)">
+    <rect width="230" height="76" rx="38" fill="#8fb8ae"/>
+    <rect x="16" y="16" width="198" height="44" rx="22" fill="#a7cabf"/>
+    <g fill="#7ba598">
+      <circle cx="62" cy="38" r="7"/><circle cx="104" cy="38" r="7"/>
+      <circle cx="146" cy="38" r="7"/><circle cx="188" cy="38" r="7"/>
+    </g>
+  </g>
+
+  <!-- sprig -->
+  <g transform="translate(790 330)">
+    <path d="M20 160V20" stroke="#3d8a6d" stroke-width="7" stroke-linecap="round"/>
+    <path d="M20 60c-26-4-38-22-34-44 24 2 36 20 34 44z" fill="#4fa384"/>
+    <path d="M20 106c26-6 36-24 32-46-24 4-34 22-32 46z" fill="#3d8a6d"/>
+  </g>
+</svg>

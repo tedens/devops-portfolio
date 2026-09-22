@@ -1,44 +1,128 @@
-- title: Github Actions CI/CD Pipeline
-  path: /01-ci-cd-pipeline/
-  summary: Modular pipeline with versioning
-  category: CI/CD
+# Single source of truth for the project list, the homepage grid, the
+# /projects/ filter and the per-project page headers. The navigation used to
+# be hardcoded in the layout as well, and the two had already drifted: 09 and
+# 10 were in the menu but missing here, so they never appeared on the homepage.
 
-- title: Node App in Local K8s
-  path: /02-k8s-local-env/
-  summary: Deploys a basic Node app in a local K8s cluster
-  category: CI/CD
+- id: niche-web-design
+  title: "Seven Niche Business Sites"
+  path: /14-niche-web-design/
+  summary: "Seven complete demo sites, one per industry, each built around a different hard booking or commerce problem."
+  category: Product & Front-end
+  status: live
+  featured: true
+  year: 2026
+  stack: [HTML, CSS, Vanilla JS, Blender, Inkscape]
+  demo: /demos/dentist/
+  repo: https://github.com/tedens/devops-portfolio/tree/main/docs/demos
 
-- title: Terraform Infrastructure Modules
-  path: /03-iac-terraform/
-  summary: Reusable modules for VPC, IAM, EKS, RDS, and more
-  category: Infrastructure
-
-- title: Monitoring & Logging
-  path: /04-monitoring-logging/
-  summary: CloudWatch dashboards + alerting + budget enforcement
-  category: Monitoring
-
-- title: AWS Cost Optimization Toolkit
-  path: /05-aws-cost-optimization-toolkit/
-  summary: Tag audit, budget alerts, and dashboards to reduce waste
-  category: Cost Optimization
-
-- title: Automated Secret Rotation
-  path: /06-secrets-rotation/
-  summary: Lambda + Terraform secret lifecycle with custom logic
-  category: Security
-
-- title: AWS Multi-Account With SSO
-  path: /07-aws-multi-account-sso/
-  summary: Centralized access management for multiple AWS accounts using SSO
-  category: Access Management
-
-- title: Zero-Trust SSH Access
-  path: /08-zero-trust-ssh/
-  summary: GitHub SSO + session auditing with Teleport
-  category: Access Management
-
-- title: ACM Manager (K8s Controller)
+- id: acm-manager
+  title: "ACM Manager"
   path: /11-acm-manager/
-  summary: Kubernetes controller to automate public cert provisioning
-  category: Open Source
+  summary: "Kubernetes controller that provisions AWS ACM certificates from Ingress annotations and wires them to the ALB."
+  category: Kubernetes
+  status: live
+  featured: true
+  year: 2025
+  stack: [Go, Kubernetes, AWS ACM, Route53, ALB]
+  repo: https://github.com/tedens/acm-manager
+
+- id: iac-terraform
+  title: "Terraform Infrastructure Modules"
+  path: /03-iac-terraform/
+  summary: "Reusable AWS modules for VPC, IAM, EKS, RDS and S3, composed with Terragrunt across environments."
+  category: Infrastructure as Code
+  status: live
+  featured: true
+  year: 2025
+  stack: [Terraform, Terragrunt, AWS, EKS]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/03-iac-terraform
+
+- id: zero-trust-ssh
+  title: "Zero-Trust SSH Access"
+  path: /08-zero-trust-ssh/
+  summary: "Short-lived SSH certificates behind GitHub SSO, with full session recording and audit."
+  category: Security & Access
+  status: live
+  featured: true
+  year: 2025
+  stack: [Teleport, Terraform, GitHub SSO, AWS]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/08-zero-trust-ssh
+
+- id: secrets-rotation
+  title: "Automated Secret Rotation"
+  path: /06-secrets-rotation/
+  summary: "Secrets Manager rotation Lambda implementing the full four-step lifecycle, deployed by Terraform."
+  category: Security & Access
+  status: live
+  year: 2025
+  stack: [AWS Secrets Manager, Lambda, Python, Terraform, IAM]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/06-secrets-rotation
+
+- id: multi-account-sso
+  title: "AWS Multi-Account with SSO"
+  path: /07-aws-multi-account-sso/
+  summary: "Centralised identity and permission sets across an AWS Organization, managed as code."
+  category: Security & Access
+  status: live
+  year: 2025
+  stack: [AWS Organizations, IAM Identity Center, Terraform]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/07-aws-multi-account-sso
+
+- id: cost-toolkit
+  title: "AWS Cost Optimization Toolkit"
+  path: /05-aws-cost-optimization-toolkit/
+  summary: "Tag auditing with a --fix mode, budget alerts and cost dashboards to stop spend drifting."
+  category: Cost Optimization
+  status: live
+  year: 2025
+  stack: [Bash, AWS CLI, CloudWatch, Budgets, Terraform]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/05-aws-cost-optimization-toolkit
+
+- id: monitoring-logging
+  title: "Monitoring & Logging Stack"
+  path: /04-monitoring-logging/
+  summary: "Prometheus, Grafana, Loki and Node Exporter as a single Compose stack with dashboards preloaded."
+  category: Observability
+  status: live
+  year: 2025
+  stack: [Prometheus, Grafana, Loki, Docker Compose]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/04-monitoring-logging
+
+- id: ci-cd-pipeline
+  title: "GitHub Actions CI/CD Pipeline"
+  path: /01-ci-cd-pipeline/
+  summary: "Lint, test, build and push a containerised Node service on every push to main."
+  category: CI/CD & Delivery
+  status: live
+  year: 2025
+  stack: [GitHub Actions, Docker, Node.js]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/01-ci-cd-pipeline
+
+- id: k8s-local-env
+  title: "Kubernetes Local Environment"
+  path: /02-k8s-local-env/
+  summary: "Deployment, Service and Ingress for a Node service on Docker Desktop's cluster."
+  category: CI/CD & Delivery
+  status: live
+  year: 2025
+  stack: [Kubernetes, Docker Desktop, Ingress]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/02-k8s-local-env
+
+- id: automated-dr-sim
+  title: "Automated DR Simulation"
+  path: /10-automated-dr-sim/
+  summary: "Terraform-provisioned recovery target with a restore-validation script, so the runbook is tested rather than trusted."
+  category: Resilience
+  status: wip
+  year: 2026
+  stack: [Terraform, Bash, AWS]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/10-automated-dr-sim
+
+- id: karpenter-spot
+  title: "Karpenter Spot Node Provisioning"
+  path: /09-karpenter-spot-nodes/
+  summary: "Cluster autoscaling onto spot capacity with consolidation and disruption budgets."
+  category: Kubernetes
+  status: planned
+  year: 2026
+  stack: [Karpenter, EKS, AWS Spot]

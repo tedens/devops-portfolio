@@ -4,7 +4,7 @@ layout: page
 permalink: /contact/
 ---
 
-If you're interested in working together—whether it's long-term DevOps contracts, fractional CTO advising, or short-term automation work—feel free to reach out using the form below.
+If you're interested in working together, whether that's long-term DevOps contracts, fractional CTO advising, or short-term automation work, feel free to reach out using the form below.
 
 <div class="contact-form">
   <form id="contact-form" method="POST">

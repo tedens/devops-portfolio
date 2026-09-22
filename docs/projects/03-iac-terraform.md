@@ -65,5 +65,3 @@ terragrunt run-all init
 terragrunt run-all plan
 terragrunt run-all apply
 ```
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/03-iac-terraform)

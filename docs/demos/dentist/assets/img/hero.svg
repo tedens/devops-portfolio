@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of a calm, light-filled dental treatment room">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#dcf0ee"/>
+      <stop offset="1" stop-color="#f7f2ec"/>
+    </linearGradient>
+    <linearGradient id="arch" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef8f7"/>
+    </linearGradient>
+    <linearGradient id="chair" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11807d"/>
+      <stop offset="1" stop-color="#063b3b"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe6db"/>
+      <stop offset="1" stop-color="#e2d5c6"/>
+    </linearGradient>
+    <clipPath id="archClip">
+      <path d="M170 520V300a190 190 0 0 1 380 0v220z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="800" height="1000" fill="url(#sky)"/>
+
+  <!-- Floor -->
+  <path d="M0 700h800v300H0z" fill="url(#floor)"/>
+  <path d="M0 700h800v14H0z" fill="#d8c8b6" opacity=".7"/>
+
+  <!-- Arched window -->
+  <path d="M170 700V300a190 190 0 0 1 380 0v400z" fill="url(#arch)"/>
+  <g clip-path="url(#archClip)" opacity=".55">
+    <circle cx="470" cy="210" r="120" fill="#ffe8b8"/>
+    <path d="M170 470h380v60H170z" fill="#7fcac4" opacity=".35"/>
+  </g>
+  <path d="M170 700V300a190 190 0 0 1 380 0v400" fill="none" stroke="#c9dedb" stroke-width="7"/>
+  <path d="M360 118v582" stroke="#c9dedb" stroke-width="6"/>
+  <path d="M175 420h370" stroke="#c9dedb" stroke-width="6"/>
+
+  <!-- Plant -->
+  <g transform="translate(640 470)">
+    <path d="M18 230c-4-60-2-110 6-150" stroke="#2f6b56" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M24 120c-40-14-58-52-52-92 42 4 68 36 72 78z" fill="#3d8a6d"/>
+    <path d="M30 140c38-20 50-60 40-98-40 10-62 44-62 86z" fill="#4fa384"/>
+    <path d="M26 190c-34-8-52-38-50-72 36 2 58 28 62 60z" fill="#357a61"/>
+    <path d="M-16 230h84l-12 92h-60z" fill="#e2a78c"/>
+    <path d="M-16 230h84l-4 26h-76z" fill="#d1907a"/>
+  </g>
+
+  <!-- Dental chair, abstracted -->
+  <g transform="translate(150 470)">
+    <rect x="40" y="200" width="300" height="42" rx="21" fill="url(#chair)"/>
+    <rect x="150" y="242" width="46" height="78" rx="12" fill="#0a5252"/>
+    <rect x="96" y="312" width="156" height="22" rx="11" fill="#063b3b"/>
+    <path d="M52 200c-18-56-6-104 34-130l178-56c30-10 56 6 62 36l8 44c6 32-12 56-44 62L96 200z" fill="url(#chair)"/>
+    <ellipse cx="300" cy="24" rx="46" ry="30" fill="#0d6767" transform="rotate(-18 300 24)"/>
+    <circle cx="300" cy="24" r="16" fill="#eef8f7" opacity=".9"/>
+  </g>
+
+  <!-- Overhead lamp -->
+  <g transform="translate(470 120)">
+    <path d="M0 0v120" stroke="#9fb7b4" stroke-width="8" stroke-linecap="round"/>
+    <path d="M-58 120h116l-22 44h-72z" fill="#f4f8f8" stroke="#c9dedb" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-30 164h60l-14 26h-32z" fill="#ffe8b8"/>
+  </g>
+
+  <!-- Floating tooth token -->
+  <g transform="translate(96 690)">
+    <rect x="-8" y="-8" width="132" height="132" rx="34" fill="#ffffff" opacity=".95"/>
+    <path d="M58 22c14 0 18 8 30 8 16 0 22 14 20 32-3 26-10 36-14 52-3 12-6 20-14 20s-9-10-12-22c-3-10-6-14-10-14s-7 4-10 14c-3 12-4 22-12 22s-11-8-14-20c-4-16-11-26-14-52-2-18 4-32 20-32 12 0 16-8 30-8z" fill="#1c9c95"/>
+  </g>
+
+  <!-- Soft light wash -->
+  <path d="M470 264 300 700h340z" fill="#fff6dd" opacity=".35"/>
+</svg>

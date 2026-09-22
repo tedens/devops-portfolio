@@ -6,19 +6,19 @@ permalink: /06-secrets-rotation/
 
 This project implements a fully automated secret rotation pipeline using AWS Secrets Manager, Lambda, and Terraform.
 
-### 🔐 Use Case
+## Use Case
 
-Secrets like database passwords or API keys shouldn't live forever. This framework ensures secrets are rotated, tested, and promoted automatically — without needing human approval or external systems.
+Secrets like database passwords or API keys shouldn't live forever. This framework ensures secrets are rotated, tested, and promoted automatically, without needing human approval or external systems.
 
-### ⚙️ Tech Stack
+## Tech Stack
 
-- **AWS Secrets Manager** — Secure secret storage and rotation engine  
-- **AWS Lambda (Python)** — Custom rotation handler implementing AWS's lifecycle  
-- **Terraform** — Infrastructure as code for deployment  
-- **IAM** — Scoped roles for least-privilege security  
-- **CloudWatch** — Logs for auditability  
+- **AWS Secrets Manager**: secure secret storage and rotation engine  
+- **AWS Lambda (Python)**: custom rotation handler implementing AWS's lifecycle  
+- **Terraform**: infrastructure as code for deployment  
+- **IAM**: scoped roles for least-privilege security  
+- **CloudWatch**: logs for auditability  
 
-### ✅ Rotation Lifecycle
+## Rotation Lifecycle
 
 The Lambda implements the four AWS rotation steps:
 
@@ -27,12 +27,12 @@ The Lambda implements the four AWS rotation steps:
 3. `testSecret` – (Optional) Validate secret works
 4. `finishSecret` – Promote to `AWSCURRENT`
 
-### 📂 Folder Highlights
+## Folder Highlights
 
-- `lambda/main.py` — Python function to generate and store new credentials  
-- `terraform/` — Provisions secret, Lambda, IAM, and rotation schedule  
+- `lambda/main.py` is the Python function that generates and stores new credentials  
+- `terraform/` provisions the secret, Lambda, IAM, and rotation schedule  
 
-### 🚀 Deployment
+## Deployment
 
 ```bash
 cd lambda
@@ -43,12 +43,10 @@ terraform init
 terraform apply
 ```
 
-### Testing Rotation
+## Testing Rotation
 
 Test by manually triggering a secret rotation and watch the cloudwatch logs.
 
 ```bash
 aws secretsmanager rotate-secret --secret-id auto-rotated-secret
 ```
-
-### 🔗 [View on GitHub](https://github.com/tedens/devops-portfolio/tree/main/06-secrets-rotation)

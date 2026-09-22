@@ -6,13 +6,13 @@ permalink: /11-acm-manager/
 
 This project introduces **acm-manager**, a Kubernetes controller that automates the provisioning of AWS ACM public certificates and ties them to Ingress resources managed by the AWS Load Balancer Controller.
 
-###  Use Case
+## Use Case
 
 Securing Ingress traffic typically requires manual ACM certificate provisioning and annotation. ACM Manager removes that friction by watching for certificate spec annotations and automating the full lifecycle (ACM issuance + Route53 DNS validation, Ingress annotation).
 
 ---
 
-###  Tech Stack
+## Tech Stack
 
 - **Kubernetes Controller** written in Go
 - **AWS ACM** for public TLS certificates
@@ -21,7 +21,7 @@ Securing Ingress traffic typically requires manual ACM certificate provisioning 
 
 ---
 
-###  Highlights
+## Highlights
 
 - Automatically requests ACM certificates based on Ingress specs
 - Applies necessary annotations to make AWS ALBs pick up the certs
@@ -29,7 +29,7 @@ Securing Ingress traffic typically requires manual ACM certificate provisioning 
 
 ---
 
-###  Example Workflow
+## Example Workflow
 
 1. Deploy `acm-manager` in your cluster  
 2. Label or annotate your Ingress resources to trigger cert creation  
@@ -40,11 +40,8 @@ Securing Ingress traffic typically requires manual ACM certificate provisioning 
 
 ---
 
-###  Why It Matters
+## Why It Matters
 
-- **Infrastructure as Code for TLS**—no more manual AWS console steps  
+- **Infrastructure as Code for TLS**: no more manual AWS console steps  
 - **Automated, secure ingress traffic** setups  
 - Great example of extending Kubernetes declaratively to consume AWS services
-
-
-### 🔗 [View on GitHub](https://github.com/tedens/acm-manager)

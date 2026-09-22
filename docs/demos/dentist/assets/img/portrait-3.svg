@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Portrait illustration of Priya Raman, hygienist">
+  <rect width="400" height="400" fill="#fde8e2"/>
+  <circle cx="200" cy="176" r="132" fill="#fbd9d0"/>
+  <path d="M60 400c8-78 62-120 140-120s132 42 140 120z" fill="#11807d"/>
+  <path d="M168 288h64v44a32 32 0 0 1-64 0z" fill="#c98d63"/>
+  <path d="M168 288l32 40 32-40 22 10-54 62-54-62z" fill="#eef8f7"/>
+  <path d="M136 160a64 64 0 0 1 128 0v46a64 64 0 0 1-128 0z" fill="#d89a6d"/>
+  <!-- long hair -->
+  <path d="M120 200c-8-84 32-124 80-124s88 40 80 124c-4 34-10 54-18 66 6-48-2-84-12-104-26 18-74 20-100 8-12 18-18 52-12 96-8-12-14-32-18-66z" fill="#2b1f1c"/>
+  <circle cx="176" cy="188" r="6" fill="#2b1f1c"/>
+  <circle cx="224" cy="188" r="6" fill="#2b1f1c"/>
+  <path d="M182 226q18 16 36 0" stroke="#a9694a" stroke-width="7" fill="none" stroke-linecap="round"/>
+</svg>

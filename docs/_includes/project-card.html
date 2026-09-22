@@ -1,0 +1,15 @@
+{%- assign p = include.project -%}
+<article class="card{% if include.feature %} card--feature{% endif %}" data-category="{{ p.category }}">
+  <div class="card__top">
+    <span class="card__cat">{{ p.category }}</span>
+    <span class="status{% if p.status != 'live' %} status--{{ p.status }}{% endif %}">{{ p.status }}</span>
+  </div>
+  <h3><a href="{{ site.baseurl }}{{ p.path }}">{{ p.title }}</a></h3>
+  <p>{{ p.summary }}</p>
+  <div class="card__foot">
+    <div class="chips">
+      {%- for t in p.stack limit: 4 -%}<span class="chip">{{ t }}</span>{%- endfor -%}
+      {%- if p.stack.size > 4 -%}<span class="chip">+{{ p.stack.size | minus: 4 }}</span>{%- endif -%}
+    </div>
+  </div>
+</article>
