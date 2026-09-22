@@ -1,0 +1,85 @@
+# Compliance gate.
+#
+# Unlike the DR drill, this needs no cloud credentials: it is static analysis
+# over the repository, so it runs on every change to infrastructure and is
+# installed at .github/workflows/compliance.yml rather than kept aside.
+#
+# Tool versions are pinned. An unpinned scanner silently changes what counts
+# as a finding, and a gate whose definition of "pass" moves on its own is not
+# a control.
+
+name: Compliance
+
+on:
+  push:
+    branches: [main]
+    paths: ["**/*.tf", "**/*.yaml", "**/*.yml", "15-compliance-as-code/**"]
+  pull_request:
+    paths: ["**/*.tf", "**/*.yaml", "**/*.yml", "15-compliance-as-code/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy-tests:
+    name: Policy unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 1.20.2
+      # The policies are code. If their tests fail, the gate below is
+      # meaningless, so this runs first and separately.
+      - run: opa test policy/ --verbose
+        working-directory: 15-compliance-as-code
+      - run: opa check policy/terraform/
+        working-directory: 15-compliance-as-code
+
+  gate:
+    name: Infrastructure gate
+    runs-on: ubuntu-latest
+    needs: policy-tests
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 1.20.2
+
+      - name: Install conftest
+        run: |
+          VERSION=0.56.0
+          curl -sSLo conftest.tar.gz \
+            "https://github.com/open-policy-agent/conftest/releases/download/v${VERSION}/conftest_${VERSION}_Linux_x86_64.tar.gz"
+          tar xzf conftest.tar.gz conftest
+          sudo mv conftest /usr/local/bin/
+
+      - name: Install trivy
+        run: |
+          VERSION=0.65.0
+          curl -sSLo trivy.tar.gz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-64bit.tar.gz"
+          tar xzf trivy.tar.gz trivy
+          sudo mv trivy /usr/local/bin/
+
+      - name: Run the gate
+        run: ./scripts/scan.sh
+        working-directory: 15-compliance-as-code
+
+      - name: Produce evidence
+        if: always()
+        run: ./scripts/evidence.sh
+        working-directory: 15-compliance-as-code
+
+      # Evidence is only useful if it is kept. Ninety days covers a quarterly
+      # review; a real programme would ship these to object storage with a
+      # retention lock instead.
+      - name: Retain evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-evidence
+          path: 15-compliance-as-code/evidence/*.json
+          retention-days: 90

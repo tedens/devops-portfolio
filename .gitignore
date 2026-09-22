@@ -27,3 +27,8 @@ override.tf.json
 node_modules/
 __pycache__/
 *.pyc
+
+# Compliance evidence is run output. One worked example is committed as
+# evidence/example-run.json; the timestamped bundles are not.
+15-compliance-as-code/evidence/*
+!15-compliance-as-code/evidence/example-run.json

@@ -1,0 +1,127 @@
+{
+  "_comment": [
+    "The control matrix. Each entry ties a framework requirement to the thing",
+    "in this repository that implements it and the thing that proves it still",
+    "does. JSON rather than YAML so the whole pipeline needs nothing but jq.",
+    "",
+    "'verified_by' must name a policy package or a scanner rule. A control",
+    "with no verification is an assertion, and assertions are what auditors",
+    "ask awkward questions about."
+  ],
+  "frameworks": {
+    "hipaa": "HIPAA Security Rule, 45 CFR Part 164 Subpart C",
+    "soc2": "SOC 2 Trust Services Criteria (2017, rev. 2022)"
+  },
+  "controls": [
+    {
+      "id": "AC-1",
+      "name": "Unique user identification",
+      "hipaa": ["164.312(a)(2)(i)"],
+      "soc2": ["CC6.1"],
+      "intent": "Every human action is attributable to one named person, not to a shared account.",
+      "implemented_by": ["07-aws-multi-account-sso/terraform"],
+      "verified_by": ["manual: no IAM users exist outside break-glass"],
+      "status": "implemented"
+    },
+    {
+      "id": "AC-2",
+      "name": "Authentication to infrastructure",
+      "hipaa": ["164.312(d)"],
+      "soc2": ["CC6.1", "CC6.6"],
+      "intent": "Access to hosts is short-lived and identity-bound, not a shared key that outlives the person.",
+      "implemented_by": ["08-zero-trust-ssh/terraform", "08-zero-trust-ssh/teleport"],
+      "verified_by": ["policy: terraform.identity"],
+      "status": "implemented"
+    },
+    {
+      "id": "AC-3",
+      "name": "Administrative ports are not internet-facing",
+      "hipaa": ["164.312(e)(1)"],
+      "soc2": ["CC6.6"],
+      "intent": "SSH and RDP are reachable only through an identity-aware proxy.",
+      "implemented_by": ["08-zero-trust-ssh/terraform"],
+      "verified_by": ["policy: terraform.network"],
+      "status": "gap"
+    },
+    {
+      "id": "EN-1",
+      "name": "Encryption at rest",
+      "hipaa": ["164.312(a)(2)(iv)"],
+      "soc2": ["CC6.1"],
+      "intent": "Stored data is encrypted. HIPAA calls this addressable, which means do it or record why not.",
+      "implemented_by": ["03-iac-terraform", "09-karpenter-spot-nodes/manifests", "10-automated-dr-sim/terraform"],
+      "verified_by": ["policy: terraform.encryption", "trivy: AVD-AWS-0080, AVD-AWS-0131"],
+      "status": "implemented"
+    },
+    {
+      "id": "EN-2",
+      "name": "Data stores are not reachable from the internet",
+      "hipaa": ["164.312(e)(1)"],
+      "soc2": ["CC6.6"],
+      "intent": "No database, cache or search node accepts traffic from outside the VPC.",
+      "implemented_by": ["10-automated-dr-sim/terraform"],
+      "verified_by": ["policy: terraform.network", "runtime: run_drill.sh asserts publicly_accessible is false"],
+      "status": "implemented"
+    },
+    {
+      "id": "AU-1",
+      "name": "Audit controls",
+      "hipaa": ["164.312(b)"],
+      "soc2": ["CC7.2"],
+      "intent": "Activity on systems holding regulated data can be reconstructed after the fact.",
+      "implemented_by": ["04-monitoring-logging", "08-zero-trust-ssh/teleport"],
+      "verified_by": ["policy: terraform.logging"],
+      "status": "gap"
+    },
+    {
+      "id": "AU-2",
+      "name": "Workload identity cannot be stolen from a pod",
+      "hipaa": ["164.312(a)(1)"],
+      "soc2": ["CC6.1"],
+      "intent": "IMDSv2 is required with a single hop, so a compromised container cannot assume the node role.",
+      "implemented_by": ["09-karpenter-spot-nodes/manifests/ec2nodeclass.yaml"],
+      "verified_by": ["policy: terraform.identity"],
+      "status": "implemented"
+    },
+    {
+      "id": "CP-1",
+      "name": "Data backup and recovery is tested",
+      "hipaa": ["164.308(a)(7)(ii)(A)", "164.308(a)(7)(ii)(D)"],
+      "soc2": ["A1.2", "A1.3"],
+      "intent": "Restores are exercised on a schedule and the recovery time is measured, not assumed.",
+      "implemented_by": ["10-automated-dr-sim"],
+      "verified_by": ["evidence: 10-automated-dr-sim/results/*.json carries rto_seconds and rpo_seconds"],
+      "status": "implemented"
+    },
+    {
+      "id": "CM-1",
+      "name": "Infrastructure change is reviewed and gated",
+      "hipaa": ["164.308(a)(8)"],
+      "soc2": ["CC8.1"],
+      "intent": "Infrastructure changes go through review, and policy runs before merge rather than after deploy.",
+      "implemented_by": ["15-compliance-as-code/workflows/compliance.yml"],
+      "verified_by": ["ci: the gate fails on any new finding"],
+      "status": "implemented"
+    },
+    {
+      "id": "SI-1",
+      "name": "Misconfiguration is detected continuously",
+      "hipaa": ["164.308(a)(1)(ii)(A)"],
+      "soc2": ["CC7.1"],
+      "intent": "Infrastructure is scanned on every change and the result is kept as evidence.",
+      "implemented_by": ["15-compliance-as-code"],
+      "verified_by": ["evidence: 15-compliance-as-code/evidence/*.json"],
+      "status": "implemented"
+    },
+    {
+      "id": "SI-2",
+      "name": "Exceptions are owned and expire",
+      "hipaa": ["164.308(a)(1)(ii)(B)"],
+      "soc2": ["CC3.2"],
+      "intent": "An accepted risk has a name and a date against it. An exception with no expiry is a decision nobody revisits.",
+      "implemented_by": ["15-compliance-as-code/baseline/accepted.json"],
+      "verified_by": ["ci: the gate fails on an expired exception"],
+      "status": "implemented"
+    }
+  ]
+}

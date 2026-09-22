@@ -1,0 +1,722 @@
+{
+  "generated_at": "20260922T234926Z",
+  "repository": {
+    "commit": "56e1b8395b623e644ba923ec112657d97e483a2e",
+    "branch": "main"
+  },
+  "tooling": {
+    "trivy": "Version: 0.65.0",
+    "conftest": "Conftest: dev",
+    "opa": "Version: 1.20.2"
+  },
+  "result": {
+    "total_findings": 23,
+    "blocking": 0,
+    "expired": 0,
+    "accepted": 23,
+    "passed": true
+  },
+  "policy_tests": {
+    "total": 22,
+    "failed": 0
+  },
+  "controls": {
+    "total": 11,
+    "implemented": 9,
+    "gaps": [
+      {
+        "id": "AC-3",
+        "name": "Administrative ports are not internet-facing",
+        "status": "gap",
+        "hipaa": [
+          "164.312(e)(1)"
+        ],
+        "soc2": [
+          "CC6.6"
+        ]
+      },
+      {
+        "id": "AU-1",
+        "name": "Audit controls",
+        "status": "gap",
+        "hipaa": [
+          "164.312(b)"
+        ],
+        "soc2": [
+          "CC7.2"
+        ]
+      }
+    ]
+  },
+  "exceptions": [
+    {
+      "fingerprint": "03-iac-terraform|AVD-AWS-0176|module.rds",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-03-01",
+      "decision": "remediate",
+      "reason": "Would remove a long-lived database password. Larger change than it looks because applications must be updated too."
+    },
+    {
+      "fingerprint": "03-iac-terraform|AVD-AWS-0090|module.s3",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Versioning protects against accidental deletion and ransomware. Should be the module default."
+    },
+    {
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "The module ships public and private subnets; the finding is against the public tier, which is doing its job. Callers place workloads in the private tier."
+    },
+    {
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "The module ships public and private subnets; the finding is against the public tier, which is doing its job. Callers place workloads in the private tier."
+    },
+    {
+      "fingerprint": "03-iac-terraform|aws-autoscaling-enable-at-rest-encryption|module.vpc",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Flow logs belong in the module rather than in every caller. Real gap against AU-1."
+    },
+    {
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-egress-sgr|aws_security_group.rds",
+      "severity": "CRITICAL",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Egress filtering on a database that has no route to the internet adds little. Wanted anyway for defence in depth, scheduled with the next module refresh."
+    },
+    {
+      "fingerprint": "05-aws-cost-optimization-toolkit|terraform.encryption|aws_sns_topic.budget_alerts",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Budget alerts carry account totals, not regulated data. Scheduled alongside the next KMS review."
+    },
+    {
+      "fingerprint": "05-aws-cost-optimization-toolkit|AVD-AWS-0095|aws_sns_topic.budget_alerts",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Same underlying issue as the terraform.encryption finding. Both fingerprints are listed so either engine can be run alone."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|terraform.network|aws_security_group.teleport_sg",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-10-22",
+      "decision": "remediate",
+      "reason": "Teleport's own proxy listens on 3023-3026 and should be the only ingress. The port 22 rule is left over from the initial build and is not needed."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|terraform.identity|aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-10-22",
+      "decision": "remediate",
+      "reason": "Pre-dates the policy. Low exploitability while the host runs no untrusted workload, but it is a one-line fix."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|terraform.logging|aws_vpc.teleport",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Teleport records the sessions themselves, which is the higher-value audit trail. Flow logs are still wanted for AU-1."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0028|aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-10-22",
+      "decision": "remediate",
+      "reason": "Duplicate of the terraform.identity finding."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-egress-sgr|aws_security_group.teleport_sg",
+      "severity": "CRITICAL",
+      "owner": "tj",
+      "expires": "2027-01-15",
+      "decision": "remediate",
+      "reason": "The proxy needs outbound for updates and the auth service. Should be narrowed to the endpoints it actually uses."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0107|aws_security_group.teleport_sg",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-10-22",
+      "decision": "remediate",
+      "reason": "Duplicate of the terraform.network finding. The port 22 rule should simply be removed; Teleport listens on 3023-3026."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0131|aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2026-10-22",
+      "decision": "remediate",
+      "reason": "The bastion holds session recordings before they are shipped, so this is data at rest. One-line fix."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-ingress-sgr|aws_subnet.teleport_public",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "The Teleport proxy is deliberately internet-facing; that is what it is for. The host behind it is not."
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|aws-autoscaling-enable-at-rest-encryption|aws_vpc.teleport",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2026-12-01",
+      "decision": "remediate",
+      "reason": "Duplicate of the terraform.logging finding for this VPC. Both fingerprints are listed so either engine can run on its own."
+    },
+    {
+      "fingerprint": "09-karpenter-spot-nodes|KSV0125|manifests/example-workload.yaml",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "The image is public.ecr.aws, which is AWS's own registry. The check's default allow-list does not include it. Policy configuration issue, not a finding."
+    },
+    {
+      "fingerprint": "10-automated-dr-sim|terraform.logging|aws_vpc.dr",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "The drill VPC exists for roughly fifteen minutes per month and has no route to the internet. Flow logs would cost more than the drill."
+    },
+    {
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0077|aws_db_instance.restored",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "Deliberate. This instance exists for about fifteen minutes and is itself a copy of a backup. Backing up a backup would cost money and protect nothing."
+    },
+    {
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0080|aws_db_instance.restored",
+      "severity": "HIGH",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "A snapshot restore inherits the source's encryption; it cannot be changed at restore time. Static analysis cannot see that, because the value depends on the snapshot. The drill should only ever be pointed at encrypted snapshots."
+    },
+    {
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0177|aws_db_instance.restored",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "Deliberate, and load-bearing. The drill must be able to destroy this instance unattended. Deletion protection here would leave copies of production running."
+    },
+    {
+      "fingerprint": "10-automated-dr-sim|aws-autoscaling-enable-at-rest-encryption|aws_vpc.dr",
+      "severity": "MEDIUM",
+      "owner": "tj",
+      "expires": "2027-09-22",
+      "decision": "accept",
+      "reason": "Duplicate of the terraform.logging finding. The drill VPC lives for minutes and has no internet route."
+    }
+  ],
+  "findings": [
+    {
+      "rule": "AVD-AWS-0176",
+      "resource": "module.rds",
+      "severity": "MEDIUM",
+      "message": "RDS IAM Database Authentication Disabled",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|AVD-AWS-0176|module.rds",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|AVD-AWS-0176|module.rds",
+        "finding": "RDS IAM database authentication disabled",
+        "reason": "Would remove a long-lived database password. Larger change than it looks because applications must be updated too.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-03-01",
+        "ticket": "PORTFOLIO-15",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0090",
+      "resource": "module.s3",
+      "severity": "MEDIUM",
+      "message": "S3 Data should be versioned",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|AVD-AWS-0090|module.s3",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|AVD-AWS-0090|module.s3",
+        "finding": "S3 buckets are not versioned",
+        "reason": "Versioning protects against accidental deletion and ransomware. Should be the module default.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-14",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "aws-vpc-no-public-ingress-sgr",
+      "resource": "module.vpc",
+      "severity": "HIGH",
+      "message": "Instances in a subnet should not receive a public IP address by default.",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+        "finding": "Subnets assign public IPs on launch",
+        "reason": "The module ships public and private subnets; the finding is against the public tier, which is doing its job. Callers place workloads in the private tier.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "aws-vpc-no-public-ingress-sgr",
+      "resource": "module.vpc",
+      "severity": "HIGH",
+      "message": "Instances in a subnet should not receive a public IP address by default.",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+        "finding": "Subnets assign public IPs on launch",
+        "reason": "The module ships public and private subnets; the finding is against the public tier, which is doing its job. Callers place workloads in the private tier.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "aws-autoscaling-enable-at-rest-encryption",
+      "resource": "module.vpc",
+      "severity": "MEDIUM",
+      "message": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet \"Rejects\" for VPCs.",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|aws-autoscaling-enable-at-rest-encryption|module.vpc",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|aws-autoscaling-enable-at-rest-encryption|module.vpc",
+        "finding": "No VPC flow log in the shared VPC module",
+        "reason": "Flow logs belong in the module rather than in every caller. Real gap against AU-1.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-13",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "aws-vpc-no-public-egress-sgr",
+      "resource": "aws_security_group.rds",
+      "severity": "CRITICAL",
+      "message": "A security group rule should not allow unrestricted egress to any IP address.",
+      "project": "03-iac-terraform",
+      "engine": "trivy",
+      "fingerprint": "03-iac-terraform|aws-vpc-no-public-egress-sgr|aws_security_group.rds",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "03-iac-terraform|aws-vpc-no-public-egress-sgr|aws_security_group.rds",
+        "finding": "Unrestricted egress from the RDS security group",
+        "reason": "Egress filtering on a database that has no route to the internet adds little. Wanted anyway for defence in depth, scheduled with the next module refresh.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-12",
+        "decision": "remediate"
+      }
+    },
+    {
+      "project": "05-aws-cost-optimization-toolkit",
+      "engine": "policy",
+      "rule": "terraform.encryption",
+      "resource": "aws_sns_topic.budget_alerts",
+      "severity": "MEDIUM",
+      "message": "MEDIUM aws_sns_topic.budget_alerts is unencrypted. Alert payloads often quote the data that triggered them.",
+      "fingerprint": "05-aws-cost-optimization-toolkit|terraform.encryption|aws_sns_topic.budget_alerts",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "05-aws-cost-optimization-toolkit|terraform.encryption|aws_sns_topic.budget_alerts",
+        "finding": "SNS topic not encrypted with a CMK",
+        "reason": "Budget alerts carry account totals, not regulated data. Scheduled alongside the next KMS review.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-11",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0095",
+      "resource": "aws_sns_topic.budget_alerts",
+      "severity": "HIGH",
+      "message": "Unencrypted SNS topic.",
+      "project": "05-aws-cost-optimization-toolkit",
+      "engine": "trivy",
+      "fingerprint": "05-aws-cost-optimization-toolkit|AVD-AWS-0095|aws_sns_topic.budget_alerts",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "05-aws-cost-optimization-toolkit|AVD-AWS-0095|aws_sns_topic.budget_alerts",
+        "finding": "SNS topic not encrypted (trivy's view of the same issue as the policy finding above)",
+        "reason": "Same underlying issue as the terraform.encryption finding. Both fingerprints are listed so either engine can be run alone.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-11",
+        "decision": "remediate"
+      }
+    },
+    {
+      "project": "08-zero-trust-ssh",
+      "engine": "policy",
+      "rule": "terraform.network",
+      "resource": "aws_security_group.teleport_sg",
+      "severity": "HIGH",
+      "message": "HIGH aws_security_group.teleport_sg allows admin port 22 from the internet. Front it with an identity-aware proxy.",
+      "fingerprint": "08-zero-trust-ssh|terraform.network|aws_security_group.teleport_sg",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|terraform.network|aws_security_group.teleport_sg",
+        "finding": "Admin port 22 reachable from 0.0.0.0/0",
+        "reason": "Teleport's own proxy listens on 3023-3026 and should be the only ingress. The port 22 rule is left over from the initial build and is not needed.",
+        "risk": "high",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-10-22",
+        "ticket": "PORTFOLIO-8",
+        "decision": "remediate"
+      }
+    },
+    {
+      "project": "08-zero-trust-ssh",
+      "engine": "policy",
+      "rule": "terraform.identity",
+      "resource": "aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "message": "HIGH aws_instance.teleport_bastion does not pin IMDSv2. Add a metadata_options block.",
+      "fingerprint": "08-zero-trust-ssh|terraform.identity|aws_instance.teleport_bastion",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|terraform.identity|aws_instance.teleport_bastion",
+        "finding": "IMDSv2 not pinned on the bastion",
+        "reason": "Pre-dates the policy. Low exploitability while the host runs no untrusted workload, but it is a one-line fix.",
+        "risk": "high",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-10-22",
+        "ticket": "PORTFOLIO-9",
+        "decision": "remediate"
+      }
+    },
+    {
+      "project": "08-zero-trust-ssh",
+      "engine": "policy",
+      "rule": "terraform.logging",
+      "resource": "aws_vpc.teleport",
+      "severity": "MEDIUM",
+      "message": "MEDIUM aws_vpc.teleport has no flow log. Network activity cannot be reconstructed after an incident.",
+      "fingerprint": "08-zero-trust-ssh|terraform.logging|aws_vpc.teleport",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|terraform.logging|aws_vpc.teleport",
+        "finding": "No VPC flow log",
+        "reason": "Teleport records the sessions themselves, which is the higher-value audit trail. Flow logs are still wanted for AU-1.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-10",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0028",
+      "resource": "aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "message": "aws_instance should activate session tokens for Instance Metadata Service.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0028|aws_instance.teleport_bastion",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|AVD-AWS-0028|aws_instance.teleport_bastion",
+        "finding": "IMDSv1 allowed on the bastion (trivy's view of the policy finding)",
+        "reason": "Duplicate of the terraform.identity finding.",
+        "risk": "high",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-10-22",
+        "ticket": "PORTFOLIO-9",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "aws-vpc-no-public-egress-sgr",
+      "resource": "aws_security_group.teleport_sg",
+      "severity": "CRITICAL",
+      "message": "A security group rule should not allow unrestricted egress to any IP address.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-egress-sgr|aws_security_group.teleport_sg",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-egress-sgr|aws_security_group.teleport_sg",
+        "finding": "Unrestricted egress from the Teleport security group",
+        "reason": "The proxy needs outbound for updates and the auth service. Should be narrowed to the endpoints it actually uses.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-01-15",
+        "ticket": "PORTFOLIO-17",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0107",
+      "resource": "aws_security_group.teleport_sg",
+      "severity": "HIGH",
+      "message": "Security groups should not allow unrestricted ingress to SSH or RDP from any IP address.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0107|aws_security_group.teleport_sg",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|AVD-AWS-0107|aws_security_group.teleport_sg",
+        "finding": "SSH open to the internet (trivy's view of the same issue as the policy finding)",
+        "reason": "Duplicate of the terraform.network finding. The port 22 rule should simply be removed; Teleport listens on 3023-3026.",
+        "risk": "high",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-10-22",
+        "ticket": "PORTFOLIO-8",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0131",
+      "resource": "aws_instance.teleport_bastion",
+      "severity": "HIGH",
+      "message": "Instance with unencrypted block device.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0131|aws_instance.teleport_bastion",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|AVD-AWS-0131|aws_instance.teleport_bastion",
+        "finding": "Unencrypted root volume on the bastion",
+        "reason": "The bastion holds session recordings before they are shipped, so this is data at rest. One-line fix.",
+        "risk": "high",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-10-22",
+        "ticket": "PORTFOLIO-16",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "aws-vpc-no-public-ingress-sgr",
+      "resource": "aws_subnet.teleport_public",
+      "severity": "HIGH",
+      "message": "Instances in a subnet should not receive a public IP address by default.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-ingress-sgr|aws_subnet.teleport_public",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-ingress-sgr|aws_subnet.teleport_public",
+        "finding": "Public subnet assigns public IPs",
+        "reason": "The Teleport proxy is deliberately internet-facing; that is what it is for. The host behind it is not.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "aws-autoscaling-enable-at-rest-encryption",
+      "resource": "aws_vpc.teleport",
+      "severity": "MEDIUM",
+      "message": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet \"Rejects\" for VPCs.",
+      "project": "08-zero-trust-ssh",
+      "engine": "trivy",
+      "fingerprint": "08-zero-trust-ssh|aws-autoscaling-enable-at-rest-encryption|aws_vpc.teleport",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "08-zero-trust-ssh|aws-autoscaling-enable-at-rest-encryption|aws_vpc.teleport",
+        "finding": "No VPC flow log (trivy's view of the same issue as the policy finding)",
+        "reason": "Duplicate of the terraform.logging finding for this VPC. Both fingerprints are listed so either engine can run on its own.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2026-12-01",
+        "ticket": "PORTFOLIO-10",
+        "decision": "remediate"
+      }
+    },
+    {
+      "rule": "KSV0125",
+      "resource": "manifests/example-workload.yaml",
+      "severity": "MEDIUM",
+      "message": "Restrict container images to trusted registries",
+      "project": "09-karpenter-spot-nodes",
+      "engine": "trivy",
+      "fingerprint": "09-karpenter-spot-nodes|KSV0125|manifests/example-workload.yaml",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "09-karpenter-spot-nodes|KSV0125|manifests/example-workload.yaml",
+        "finding": "Image not from a registry on the default trusted list",
+        "reason": "The image is public.ecr.aws, which is AWS's own registry. The check's default allow-list does not include it. Policy configuration issue, not a finding.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "project": "10-automated-dr-sim",
+      "engine": "policy",
+      "rule": "terraform.logging",
+      "resource": "aws_vpc.dr",
+      "severity": "MEDIUM",
+      "message": "MEDIUM aws_vpc.dr has no flow log. Network activity cannot be reconstructed after an incident.",
+      "fingerprint": "10-automated-dr-sim|terraform.logging|aws_vpc.dr",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "10-automated-dr-sim|terraform.logging|aws_vpc.dr",
+        "finding": "No VPC flow log on the drill VPC",
+        "reason": "The drill VPC exists for roughly fifteen minutes per month and has no route to the internet. Flow logs would cost more than the drill.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0077",
+      "resource": "aws_db_instance.restored",
+      "severity": "MEDIUM",
+      "message": "RDS Cluster and RDS instance should have backup retention longer than default 1 day",
+      "project": "10-automated-dr-sim",
+      "engine": "trivy",
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0077|aws_db_instance.restored",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "10-automated-dr-sim|AVD-AWS-0077|aws_db_instance.restored",
+        "finding": "Backup retention is zero",
+        "reason": "Deliberate. This instance exists for about fifteen minutes and is itself a copy of a backup. Backing up a backup would cost money and protect nothing.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0080",
+      "resource": "aws_db_instance.restored",
+      "severity": "HIGH",
+      "message": "RDS encryption has not been enabled at a DB Instance level.",
+      "project": "10-automated-dr-sim",
+      "engine": "trivy",
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0080|aws_db_instance.restored",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "10-automated-dr-sim|AVD-AWS-0080|aws_db_instance.restored",
+        "finding": "RDS encryption not enabled at instance level",
+        "reason": "A snapshot restore inherits the source's encryption; it cannot be changed at restore time. Static analysis cannot see that, because the value depends on the snapshot. The drill should only ever be pointed at encrypted snapshots.",
+        "risk": "medium",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "AVD-AWS-0177",
+      "resource": "aws_db_instance.restored",
+      "severity": "MEDIUM",
+      "message": "RDS Deletion Protection Disabled",
+      "project": "10-automated-dr-sim",
+      "engine": "trivy",
+      "fingerprint": "10-automated-dr-sim|AVD-AWS-0177|aws_db_instance.restored",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "10-automated-dr-sim|AVD-AWS-0177|aws_db_instance.restored",
+        "finding": "Deletion protection disabled",
+        "reason": "Deliberate, and load-bearing. The drill must be able to destroy this instance unattended. Deletion protection here would leave copies of production running.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    },
+    {
+      "rule": "aws-autoscaling-enable-at-rest-encryption",
+      "resource": "aws_vpc.dr",
+      "severity": "MEDIUM",
+      "message": "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet \"Rejects\" for VPCs.",
+      "project": "10-automated-dr-sim",
+      "engine": "trivy",
+      "fingerprint": "10-automated-dr-sim|aws-autoscaling-enable-at-rest-encryption|aws_vpc.dr",
+      "state": "accepted",
+      "exception": {
+        "fingerprint": "10-automated-dr-sim|aws-autoscaling-enable-at-rest-encryption|aws_vpc.dr",
+        "finding": "No VPC flow log on the drill VPC (trivy's view of the policy finding)",
+        "reason": "Duplicate of the terraform.logging finding. The drill VPC lives for minutes and has no internet route.",
+        "risk": "low",
+        "owner": "tj",
+        "accepted": "2026-09-22",
+        "expires": "2027-09-22",
+        "ticket": null,
+        "decision": "accept"
+      }
+    }
+  ]
+}

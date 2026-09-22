@@ -15,6 +15,17 @@
   demo: /demos/dentist/
   repo: https://github.com/tedens/devops-portfolio/tree/main/docs/demos
 
+- id: compliance-as-code
+  title: "Compliance as Code"
+  path: /15-compliance-as-code/
+  summary: "HIPAA and SOC 2 controls as policy, gated on every change, with expiring exceptions and a dated evidence trail. Runs against this repository."
+  category: Security & Access
+  status: live
+  featured: true
+  year: 2026
+  stack: [OPA/Rego, Conftest, Trivy, GitHub Actions, jq]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/15-compliance-as-code
+
 - id: acm-manager
   title: "ACM Manager"
   path: /11-acm-manager/

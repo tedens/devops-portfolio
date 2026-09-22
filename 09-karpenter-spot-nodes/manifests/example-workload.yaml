@@ -30,23 +30,48 @@ spec:
       # 2. Shut down inside the two minutes a spot notice gives you.
       terminationGracePeriodSeconds: 60
 
+      # 4. Run as a normal user with nothing extra. Caught by the compliance
+      #    gate in project 15, which is the point of having one: this file is
+      #    held up as the example, so it has to survive its own policy.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: web
-          image: public.ecr.aws/nginx/nginx:1.27
-          ports: [{ containerPort: 80 }]
+          # Unprivileged variant, so nothing needs to bind below port 1024.
+          image: public.ecr.aws/nginx/nginx-unprivileged:1.27
+          ports: [{ containerPort: 8080 }]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - { name: cache, mountPath: /var/cache/nginx }
+            - { name: run, mountPath: /tmp }
           # 3. Requests, so Karpenter can size a node correctly. Without them
           #    it guesses, and consolidation cannot reason about the fit.
           resources:
             requests: { cpu: 200m, memory: 256Mi }
             limits: { memory: 256Mi }
           readinessProbe:
-            httpGet: { path: /, port: 80 }
+            httpGet: { path: /, port: 8080 }
             initialDelaySeconds: 2
           lifecycle:
             preStop:
               exec:
                 # Let the load balancer notice before the process goes away.
                 command: ["sh", "-c", "sleep 10"]
+
+      # A read-only root filesystem needs somewhere writable for the bits
+      # that genuinely have to be written.
+      volumes:
+        - { name: cache, emptyDir: {} }
+        - { name: run, emptyDir: {} }
 ---
 # The backstop. Karpenter honours PDBs during voluntary disruption, so this
 # is what stops consolidation draining the whole deployment at once.
