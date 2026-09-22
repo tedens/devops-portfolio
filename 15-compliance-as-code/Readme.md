@@ -142,6 +142,28 @@ production.
 | `scripts/render_controls.sh` | Control matrix as markdown |
 | `workflows/compliance.yml` | Runs on every infrastructure change |
 
+## The drift this project warns about, happening to this project
+
+The first CI run failed, and then failed differently, which turned out to be
+the best test it could have had.
+
+Local development used trivy 0.65.0 from Homebrew. The CI workflow pinned the
+same number, but **no such GitHub release exists**, so the install step died.
+Pinning to a real version, 0.74.0, then produced 18 new findings and 17 stale
+exceptions from a single tool upgrade: trivy had renamed its rule identifiers.
+`AVD-AWS-0107` became `AWS-0107`, `KSV0125` became `KSV-0125`, and descriptive
+slugs like `aws-vpc-no-public-egress-sgr` became `AWS-0104`. Every fingerprint
+in the baseline stopped matching at once.
+
+Two changes came out of it. Rule identifiers are now normalised before
+fingerprinting, so a prefix rename cannot invalidate the baseline again. And
+the version is pinned to one that exists, in CI and locally, because a gate
+whose definition of "pass" moves on its own is not a control.
+
+Worth noting what the rename fixed: the old slug for the VPC flow-log check
+was `aws-autoscaling-enable-at-rest-encryption`, which has nothing to do with
+flow logs. The scanner had the wrong label on that rule for a long time.
+
 ## Honest limits
 
 This checks **configuration**, which is one slice of either framework. It says

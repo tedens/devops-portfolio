@@ -67,7 +67,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "03-iac-terraform|aws-vpc-no-public-egress-sgr|aws_security_group.rds",
+      "fingerprint": "03-iac-terraform|AWS-0104|aws_security_group.rds",
       "finding": "Unrestricted egress from the RDS security group",
       "reason": "Egress filtering on a database that has no route to the internet adds little. Wanted anyway for defence in depth, scheduled with the next module refresh.",
       "risk": "medium",
@@ -78,7 +78,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "03-iac-terraform|aws-vpc-no-public-ingress-sgr|module.vpc",
+      "fingerprint": "03-iac-terraform|AWS-0164|module.vpc",
       "finding": "Subnets assign public IPs on launch",
       "reason": "The module ships public and private subnets; the finding is against the public tier, which is doing its job. Callers place workloads in the private tier.",
       "risk": "low",
@@ -89,7 +89,7 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "03-iac-terraform|aws-autoscaling-enable-at-rest-encryption|module.vpc",
+      "fingerprint": "03-iac-terraform|AWS-0178|module.vpc",
       "finding": "No VPC flow log in the shared VPC module",
       "reason": "Flow logs belong in the module rather than in every caller. Real gap against AU-1.",
       "risk": "medium",
@@ -100,7 +100,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "03-iac-terraform|AVD-AWS-0090|module.s3",
+      "fingerprint": "03-iac-terraform|AWS-0090|module.s3",
       "finding": "S3 buckets are not versioned",
       "reason": "Versioning protects against accidental deletion and ransomware. Should be the module default.",
       "risk": "medium",
@@ -111,7 +111,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "03-iac-terraform|AVD-AWS-0176|module.rds",
+      "fingerprint": "03-iac-terraform|AWS-0176|module.rds",
       "finding": "RDS IAM database authentication disabled",
       "reason": "Would remove a long-lived database password. Larger change than it looks because applications must be updated too.",
       "risk": "medium",
@@ -122,7 +122,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "05-aws-cost-optimization-toolkit|AVD-AWS-0095|aws_sns_topic.budget_alerts",
+      "fingerprint": "05-aws-cost-optimization-toolkit|AWS-0095|aws_sns_topic.budget_alerts",
       "finding": "SNS topic not encrypted (trivy's view of the same issue as the policy finding above)",
       "reason": "Same underlying issue as the terraform.encryption finding. Both fingerprints are listed so either engine can be run alone.",
       "risk": "medium",
@@ -133,7 +133,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0107|aws_security_group.teleport_sg",
+      "fingerprint": "08-zero-trust-ssh|AWS-0107|aws_security_group.teleport_sg",
       "finding": "SSH open to the internet (trivy's view of the same issue as the policy finding)",
       "reason": "Duplicate of the terraform.network finding. The port 22 rule should simply be removed; Teleport listens on 3023-3026.",
       "risk": "high",
@@ -144,7 +144,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0028|aws_instance.teleport_bastion",
+      "fingerprint": "08-zero-trust-ssh|AWS-0028|aws_instance.teleport_bastion",
       "finding": "IMDSv1 allowed on the bastion (trivy's view of the policy finding)",
       "reason": "Duplicate of the terraform.identity finding.",
       "risk": "high",
@@ -155,7 +155,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|AVD-AWS-0131|aws_instance.teleport_bastion",
+      "fingerprint": "08-zero-trust-ssh|AWS-0131|aws_instance.teleport_bastion",
       "finding": "Unencrypted root volume on the bastion",
       "reason": "The bastion holds session recordings before they are shipped, so this is data at rest. One-line fix.",
       "risk": "high",
@@ -166,7 +166,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-egress-sgr|aws_security_group.teleport_sg",
+      "fingerprint": "08-zero-trust-ssh|AWS-0104|aws_security_group.teleport_sg",
       "finding": "Unrestricted egress from the Teleport security group",
       "reason": "The proxy needs outbound for updates and the auth service. Should be narrowed to the endpoints it actually uses.",
       "risk": "medium",
@@ -177,7 +177,7 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|aws-vpc-no-public-ingress-sgr|aws_subnet.teleport_public",
+      "fingerprint": "08-zero-trust-ssh|AWS-0164|aws_subnet.teleport_public",
       "finding": "Public subnet assigns public IPs",
       "reason": "The Teleport proxy is deliberately internet-facing; that is what it is for. The host behind it is not.",
       "risk": "low",
@@ -188,7 +188,7 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "09-karpenter-spot-nodes|KSV0125|manifests/example-workload.yaml",
+      "fingerprint": "09-karpenter-spot-nodes|KSV-0125|manifests/example-workload.yaml",
       "finding": "Image not from a registry on the default trusted list",
       "reason": "The image is public.ecr.aws, which is AWS's own registry. The check's default allow-list does not include it. Policy configuration issue, not a finding.",
       "risk": "low",
@@ -199,7 +199,7 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "10-automated-dr-sim|AVD-AWS-0080|aws_db_instance.restored",
+      "fingerprint": "10-automated-dr-sim|AWS-0080|aws_db_instance.restored",
       "finding": "RDS encryption not enabled at instance level",
       "reason": "A snapshot restore inherits the source's encryption; it cannot be changed at restore time. Static analysis cannot see that, because the value depends on the snapshot. The drill should only ever be pointed at encrypted snapshots.",
       "risk": "medium",
@@ -210,7 +210,7 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "10-automated-dr-sim|AVD-AWS-0077|aws_db_instance.restored",
+      "fingerprint": "10-automated-dr-sim|AWS-0077|aws_db_instance.restored",
       "finding": "Backup retention is zero",
       "reason": "Deliberate. This instance exists for about fifteen minutes and is itself a copy of a backup. Backing up a backup would cost money and protect nothing.",
       "risk": "low",
@@ -221,7 +221,7 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "10-automated-dr-sim|AVD-AWS-0177|aws_db_instance.restored",
+      "fingerprint": "10-automated-dr-sim|AWS-0177|aws_db_instance.restored",
       "finding": "Deletion protection disabled",
       "reason": "Deliberate, and load-bearing. The drill must be able to destroy this instance unattended. Deletion protection here would leave copies of production running.",
       "risk": "low",
@@ -232,9 +232,9 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|aws-autoscaling-enable-at-rest-encryption|aws_vpc.teleport",
+      "fingerprint": "08-zero-trust-ssh|AWS-0178|aws_vpc.teleport",
       "finding": "No VPC flow log (trivy's view of the same issue as the policy finding)",
-      "reason": "Duplicate of the terraform.logging finding for this VPC. Both fingerprints are listed so either engine can run on its own.",
+      "reason": "Duplicate of the terraform.logging finding for this VPC. Both fingerprints are listed so either engine can run on its own. (Rule id changed in trivy 0.74; the old id mislabelled this as an autoscaling check.)",
       "risk": "medium",
       "owner": "tj",
       "accepted": "2026-09-22",
@@ -243,9 +243,9 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "10-automated-dr-sim|aws-autoscaling-enable-at-rest-encryption|aws_vpc.dr",
+      "fingerprint": "10-automated-dr-sim|AWS-0178|aws_vpc.dr",
       "finding": "No VPC flow log on the drill VPC (trivy's view of the policy finding)",
-      "reason": "Duplicate of the terraform.logging finding. The drill VPC lives for minutes and has no internet route.",
+      "reason": "Duplicate of the terraform.logging finding. The drill VPC lives for minutes and has no internet route. (Rule id changed in trivy 0.74; the old id mislabelled this as an autoscaling check.)",
       "risk": "low",
       "owner": "tj",
       "accepted": "2026-09-22",

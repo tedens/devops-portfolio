@@ -75,8 +75,14 @@ for d in "${TARGETS[@]}"; do
     [[ -z "$line" ]] && continue
     add "$(jq -c --arg p "$d" '. + {project:$p, engine:"trivy",
             fingerprint:($p+"|"+.rule+"|"+.resource)}' <<<"$line")"
+  # Normalise the rule id. Trivy has renamed its identifiers before
+  # (AVD-AWS-0107 became AWS-0107, KSV0125 became KSV-0125), and a rename
+  # invalidates every fingerprint in the baseline at once. Stripping the
+  # prefix and regularising the separator survives that class of change.
+  # It does not survive a slug being replaced by a number, which is why the
+  # tool version is pinned in CI as well.
   done < <(jq -c '.Results[]? | select(.Misconfigurations) | . as $r | .Misconfigurations[]
-                  | {rule:.ID,
+                  | {rule:(.ID | sub("^AVD-";"") | sub("^KSV(?<n>[0-9]+)$";"KSV-\(.n)")),
                      resource:(if (.CauseMetadata.Resource // "") != "" then .CauseMetadata.Resource
                                else $r.Target end),
                      severity:.Severity, message:.Title}' <<<"$traw" 2>/dev/null || true)
