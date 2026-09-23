@@ -1,0 +1,130 @@
+name: GitOps delivery
+
+# This runs the drill, not a lint.
+#
+# The rollback claim is the only thing this project asserts, and the first
+# three times it was run by hand it "passed" for reasons that had nothing to
+# do with the canary: an empty Prometheus result indexed out of range, then a
+# merge patch that stripped the container's port so the canary received no
+# traffic at all. Both produced a rollback. Neither measured anything.
+#
+# A claim that is only checked by hand is checked once. This checks both
+# directions on every change: a broken build must be rejected, and a healthy
+# build must be promoted. An analysis that rejects everything passes the
+# first test and is useless.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '16-gitops-delivery/**'
+      - '.github/workflows/gitops.yml'
+  pull_request:
+    paths:
+      - '16-gitops-delivery/**'
+      - '.github/workflows/gitops.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    name: Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: YAML parses
+        run: |
+          for f in $(find 16-gitops-delivery -name '*.yaml'); do
+            ruby -ryaml -e 'YAML.load_stream(File.read(ARGV[0])) { |d| }' "$f"
+          done
+          echo "all manifests parse"
+
+      - name: App has no syntax errors
+        run: node --check 16-gitops-delivery/app/src/index.js
+
+      - name: Manifests validate against real CRD schemas
+        run: |
+          # kubeconform with the CRD catalogue, so a typo in a Rollout field
+          # fails here rather than at kubectl apply. The AnalysisTemplate that
+          # carried podTemplateHashValue in the wrong place was rejected by
+          # the API server; this is where that should have been caught.
+          curl -sSLo /tmp/kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          /tmp/kubeconform \
+            -strict -summary -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            16-gitops-delivery/manifests 16-gitops-delivery/apps
+
+  drill:
+    name: Rollback drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: manifests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: gitops-demo
+          # Kept in step with bootstrap/versions.env by the check below.
+          node_image: kindest/node:v1.31.4
+
+      - name: Pinned versions match bootstrap/versions.env
+        run: |
+          # Two places naming a version is one place too many, and the one
+          # that drifts is always the one nobody runs locally.
+          source 16-gitops-delivery/bootstrap/versions.env
+          grep -q "node_image: $KIND_NODE_IMAGE" .github/workflows/gitops.yml \
+            || { echo "node image in this workflow does not match versions.env ($KIND_NODE_IMAGE)"; exit 1; }
+          echo "versions agree"
+
+      - name: Bring up the stack
+        working-directory: 16-gitops-delivery
+        run: |
+          # --local: Argo CD would pull this repo at main, which on a pull
+          # request is not the code under test. The app of apps is exercised
+          # separately below against whatever main currently holds.
+          ./scripts/up.sh --local
+
+      - name: A broken build is rejected and rolled back
+        working-directory: 16-gitops-delivery
+        run: |
+          ./scripts/reset.sh
+          ./scripts/rollback-drill.sh
+
+      - name: A healthy build is promoted
+        working-directory: 16-gitops-delivery
+        run: |
+          ./scripts/reset.sh
+          ./scripts/rollback-drill.sh --healthy
+
+      - name: The analysis measured real numbers
+        working-directory: 16-gitops-delivery
+        run: |
+          # The drill passing is not enough on its own. An analysis that
+          # errors also aborts a rollout, and an aborted rollout looks like a
+          # successful rollback. Assert every measurement carries a value.
+          empty=$(kubectl -n demo get analysisrun -o json |
+            jq '[.items[].status.metricResults[]?.measurements[]?
+                 | select((.value // "[]") == "[]")] | length')
+          echo "measurements with no value: $empty"
+          [ "$empty" = "0" ] || {
+            echo "the gate reached a verdict without measuring anything"
+            kubectl -n demo get analysisrun -o yaml | grep -A4 measurements
+            exit 1
+          }
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n demo get rollout demo-service -o yaml || true
+          kubectl -n demo get analysisrun -o yaml || true
+          kubectl -n demo get endpointslice -o wide || true
+          kubectl -n monitoring logs deploy/prometheus --tail=50 || true
+          kubectl -n argo-rollouts logs deploy/argo-rollouts --tail=100 || true

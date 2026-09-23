@@ -1,0 +1,43 @@
+# The app of apps.
+#
+# This is the only Application applied by hand. It watches apps/ in this
+# repository and creates everything else, so adding a component to the
+# cluster is a file in a directory rather than a kubectl command somebody
+# ran once and did not write down.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+    # Without this, deleting the root Application orphans every child rather
+    # than removing them, and the cluster keeps running things git no longer
+    # describes.
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/tedens/devops-portfolio.git
+    targetRevision: main
+    path: 16-gitops-delivery/apps
+
+    directory:
+      recurse: false
+      # The root Application must not adopt itself: a self-referential
+      # Application flaps between synced and progressing forever.
+      exclude: root.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      # Revert anything changed by hand in the cluster. A GitOps setup that
+      # tolerates drift is a deployment tool with extra steps.
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

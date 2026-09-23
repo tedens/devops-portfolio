@@ -1,0 +1,10 @@
+{
+  "name": "gitops-demo-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The service delivered by project 16. No dependencies on purpose.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}

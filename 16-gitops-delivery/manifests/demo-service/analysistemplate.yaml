@@ -1,0 +1,83 @@
+# The measurement the canary is gated on.
+#
+# The query below is the part worth reading twice. An obvious version of it
+# looks like this:
+#
+#   sum(rate(http_requests_total{status_class!="5xx"}[1m]))
+#     / sum(rate(http_requests_total[1m]))
+#
+# and it does not work. With no selector it averages the canary's failures
+# into the stable pods' traffic. At a 20% canary weight, a pod failing 60% of
+# requests moves the fleet-wide success rate from 100% to roughly 88%, which
+# sails past a 95% threshold. The canary is promoted precisely because most
+# of the fleet is still healthy.
+#
+# rollouts-pod-template-hash is what fixes it. Argo Rollouts sets that label
+# on the canary ReplicaSet's pods, passes the value in as an argument, and the
+# query then measures only the new version.
+
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: demo
+spec:
+  args:
+    - name: service-name
+    # Declared here, supplied by the Rollout. valueFrom belongs on the
+    # caller's side: putting podTemplateHashValue in the template is rejected
+    # outright by the CRD schema.
+    - name: canary-hash
+
+  metrics:
+    - name: success-rate
+      # Nothing is measured for the first minute. The query takes a rate over
+      # a one-minute window, and a canary pod that started ten seconds ago
+      # has no window to take a rate over. Measuring immediately returns an
+      # empty vector, which is not the same thing as a bad canary.
+      #
+      # This was not a theoretical concern. Without it the first drill
+      # "passed": the broken build was rolled back, but by
+      # consecutiveErrorLimit, on "reflect: slice index out of range" from
+      # indexing an empty result. The gate had measured nothing. Shipping a
+      # healthy build proved it, because that was rolled back too, with the
+      # identical error. A release gate that rejects everything passes a
+      # rollback test and is useless.
+      initialDelay: 60s
+
+      # Five measurements thirty seconds apart. Long enough that a single
+      # unlucky scrape does not abort a good release, short enough that a bad
+      # one is caught inside the first pause.
+      interval: 30s
+      count: 5
+
+      # Two bad measurements abort. One is noise; two from a canary taking a
+      # fifth of the traffic is a broken build.
+      failureLimit: 1
+      consecutiveErrorLimit: 2
+
+      # len(result) == 1 is load-bearing, and not only to stop the panic.
+      # It decides what "no data" means. Without it an empty result is an
+      # Error, and errors are governed by consecutiveErrorLimit rather than
+      # failureLimit, so the behaviour on a canary nobody can measure depends
+      # on a setting meant for a Prometheus outage. With it, unmeasurable is
+      # a failed measurement: the release does not proceed on the strength of
+      # data that does not exist.
+      successCondition: len(result) == 1 && result[0] >= 0.95
+
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(
+              rate(http_requests_total{
+                status_class="2xx",
+                rollouts_pod_template_hash="{{args.canary-hash}}"
+              }[1m])
+            )
+            /
+            sum(
+              rate(http_requests_total{
+                rollouts_pod_template_hash="{{args.canary-hash}}"
+              }[1m])
+            )

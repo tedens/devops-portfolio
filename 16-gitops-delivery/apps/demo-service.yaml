@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-service
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/tedens/devops-portfolio.git
+    targetRevision: main
+    path: 16-gitops-delivery/manifests/demo-service
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
+
+  ignoreDifferences:
+    # Argo Rollouts owns these selectors: it injects rollouts-pod-template-hash
+    # to pin each Service to one ReplicaSet. Argo CD sees that as drift from
+    # git and, with selfHeal on, reverts it mid-canary, which detaches the
+    # analysis from the pods it is supposed to be measuring. The two
+    # controllers fight and the rollout stalls.
+    - group: ""
+      kind: Service
+      name: demo-service-stable
+      jsonPointers:
+        - /spec/selector
+    - group: ""
+      kind: Service
+      name: demo-service-canary
+      jsonPointers:
+        - /spec/selector

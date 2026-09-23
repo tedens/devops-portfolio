@@ -1,0 +1,58 @@
+# Constant traffic against the stable Service.
+#
+# The canary analysis divides one rate by another. With no traffic both are
+# zero, the query returns no data, and an empty result is not a failed check:
+# a canary nobody is calling passes every time.
+#
+# Note the target. This calls demo-service, the unpinned Service that selects
+# every pod, so requests land on canary pods in proportion to their share of
+# the replicas. Calling demo-service-stable would send zero requests to the
+# canary and produce exactly the silent pass described above.
+#
+# In a real cluster this is production traffic. Here it is a loop.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: loadgen
+  template:
+    metadata:
+      labels:
+        app: loadgen
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: curl
+          image: curlimages/curl:8.11.1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # --max-time keeps a hung backend from stalling the loop, which
+              # would quietly reduce the sample rate at exactly the moment
+              # the analysis needs samples.
+              while true; do
+                curl -s -o /dev/null --max-time 2 http://demo-service.demo.svc.cluster.local/ || true
+                sleep 0.1
+              done
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi

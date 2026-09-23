@@ -1,0 +1,63 @@
+# Three Services over one workload, and the third one is not optional.
+#
+# Argo Rollouts rewrites the selectors on canaryService and stableService: it
+# injects rollouts-pod-template-hash so each one resolves to exactly one
+# ReplicaSet. They exist so the controller and the analysis can address a
+# specific version.
+#
+# Neither of them is where traffic goes. Pointing a load generator at
+# demo-service-stable sends nothing at all to the canary, the analysis query
+# finds no series for the canary hash, and an empty result is not a failed
+# check: the broken build gets promoted having never served a request.
+#
+# Without a traffic router, the canary weight is approximated by replica
+# count, so client traffic goes to a plain Service that selects every pod and
+# whose selector the controller leaves alone. That is demo-service.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+  namespace: demo
+  labels:
+    app: demo-service
+spec:
+  # No pod-template-hash, and the controller leaves this selector alone. This
+  # is the Service clients call; the split across versions is by how many
+  # pods of each the Rollout is running.
+  selector:
+    app: demo-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service-stable
+  namespace: demo
+  labels:
+    app: demo-service
+spec:
+  selector:
+    app: demo-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service-canary
+  namespace: demo
+  labels:
+    app: demo-service
+spec:
+  selector:
+    app: demo-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

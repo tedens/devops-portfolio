@@ -3,6 +3,17 @@
 # be hardcoded in the layout as well, and the two had already drifted: 09 and
 # 10 were in the menu but missing here, so they never appeared on the homepage.
 
+- id: gitops-delivery
+  title: "GitOps Delivery"
+  path: /16-gitops-delivery/
+  summary: "Argo CD pulls the repository, Argo Rollouts runs a canary gated on Prometheus, and a build that fails its measurements rolls itself back. The drill runs in CI."
+  category: CI/CD & Delivery
+  status: live
+  featured: true
+  year: 2026
+  stack: [Argo CD, Argo Rollouts, Prometheus, Kubernetes, kind]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/16-gitops-delivery
+
 - id: niche-web-design
   title: "Seven Niche Business Sites"
   path: /14-niche-web-design/
