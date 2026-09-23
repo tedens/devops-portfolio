@@ -73,3 +73,93 @@ test_warns_on_public_ip_subnet if {
 	r := network.warn with input as {"resource": {"aws_subnet": {"public": [{"map_public_ip_on_launch": true}]}}}
 	count(r) == 1
 }
+
+# ---------------------------------------------------------------------------
+# aws_vpc_security_group_ingress_rule
+#
+# Every case below passed the policy clean before the standalone-resource
+# rules were added, including a wide open port 22. The inline-block rules and
+# these have to stay in step, because a project can use either syntax and
+# 08 now uses this one.
+# ---------------------------------------------------------------------------
+
+rule(body) := {"resource": {"aws_vpc_security_group_ingress_rule": {"r": [body]}}}
+
+test_standalone_rule_denies_ssh_from_the_internet if {
+	r := network.deny with input as rule({
+		"security_group_id": "sg-1",
+		"cidr_ipv4": "0.0.0.0/0",
+		"ip_protocol": "tcp",
+		"from_port": 22, "to_port": 22,
+	})
+	count(r) == 1
+}
+
+test_standalone_rule_denies_postgres_from_the_internet if {
+	r := network.deny with input as rule({
+		"cidr_ipv4": "0.0.0.0/0",
+		"ip_protocol": "tcp",
+		"from_port": 5432, "to_port": 5432,
+	})
+	count(r) == 1
+}
+
+test_standalone_rule_denies_ipv6_wildcard if {
+	r := network.deny with input as rule({
+		"cidr_ipv6": "::/0",
+		"ip_protocol": "tcp",
+		"from_port": 22, "to_port": 22,
+	})
+	count(r) == 1
+}
+
+test_standalone_rule_denies_all_protocols if {
+	# ip_protocol "-1" carries no from_port or to_port at all. A range check
+	# alone would never fire on it, so this is the case most likely to be
+	# missed, and it is the one that exposes everything.
+	r := network.deny with input as rule({
+		"cidr_ipv4": "0.0.0.0/0",
+		"ip_protocol": "-1",
+	})
+	count(r) > 0
+}
+
+test_standalone_rule_denies_data_port_inside_a_range if {
+	r := network.deny with input as rule({
+		"cidr_ipv4": "0.0.0.0/0",
+		"ip_protocol": "tcp",
+		"from_port": 1000, "to_port": 9999,
+	})
+	count(r) > 0
+}
+
+test_standalone_rule_allows_security_group_reference if {
+	# The fix this policy is asking for: no CIDR at all.
+	r := network.deny with input as rule({
+		"referenced_security_group_id": "sg-2",
+		"ip_protocol": "tcp",
+		"from_port": 22, "to_port": 22,
+	})
+	count(r) == 0
+}
+
+test_standalone_rule_allows_https_from_the_internet if {
+	# An identity-aware proxy is meant to be reachable. 443 is neither a data
+	# port nor an admin port, so this must not fire; if it did, 08 could not
+	# be expressed at all and the rule would be turned off.
+	r := network.deny with input as rule({
+		"cidr_ipv4": "0.0.0.0/0",
+		"ip_protocol": "tcp",
+		"from_port": 443, "to_port": 443,
+	})
+	count(r) == 0
+}
+
+test_standalone_rule_allows_internal_cidr if {
+	r := network.deny with input as rule({
+		"cidr_ipv4": "10.10.0.0/16",
+		"ip_protocol": "tcp",
+		"from_port": 22, "to_port": 22,
+	})
+	count(r) == 0
+}

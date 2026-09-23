@@ -26,8 +26,18 @@ for the project. The Karpenter one was a genuine mistake and was fixed: the
 workload is now non-root and read-only with all capabilities dropped, which
 took that project from eight findings to one. The DR ones are correct for a
 fifteen-minute environment that is itself a copy of a backup, and are accepted
-with that reason written down. The SSH one is a real gap with a name and a
-date against it.
+with that reason written down. The SSH one was a real gap, and the gate is
+what forced it: project 08 has since been
+[rebuilt from the ground up]({{ site.baseurl }}/08-zero-trust-ssh/) and all
+nine of its findings are gone.
+
+That rebuild also found a hole in this policy. Project 08 now uses
+`aws_vpc_security_group_ingress_rule`, the standalone resource AWS
+recommends, and the Rego here had only ever been written against the inline
+`ingress` block. A rule opening port 22 to `0.0.0.0/0`, written the modern
+way, passed the whole policy clean. Both shapes are covered now, including
+`ip_protocol = "-1"`, which carries no port range at all; the test suite went
+from 30 to 38.
 
 ## Two engines, doing different jobs
 

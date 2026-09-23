@@ -1,0 +1,51 @@
+# The role a GitHub team member gets after SSO.
+#
+# The previous connector mapped a whole GitHub team to Teleport's built-in
+# "admin" role, which can read and delete the audit log it is recorded in.
+# This role can open sessions on labelled nodes and nothing else.
+kind: role
+version: v7
+metadata:
+  name: ssh-operator
+  description: "Interactive access to labelled nodes. No cluster administration."
+spec:
+  options:
+    # Short enough that a stolen certificate expires inside a working day.
+    max_session_ttl: 8h
+
+    # Disconnect an idle session rather than leaving an authenticated shell
+    # open on a host overnight.
+    client_idle_timeout: 15m
+    disconnect_expired_cert: true
+
+    # The recording is the audit trail, so a session that cannot be recorded
+    # must not start. Without this, an operator who can stop the upload gets
+    # an unrecorded shell.
+    record_session:
+      default: strict
+      ssh: strict
+
+    require_session_mfa: true
+    permit_x11_forwarding: false
+    forward_agent: false
+    port_forwarding: false
+
+  allow:
+    logins: ["app"]
+    node_labels:
+      env: ["demo"]
+      role: ["workload"]
+
+    rules:
+      - resources: ["session"]
+        verbs: ["read", "list"]
+
+  deny:
+    # Root is never a login, whatever a node's own configuration allows.
+    logins: ["root", "ec2-user"]
+
+    rules:
+      # An operator cannot edit the rules that constrain them, cannot issue
+      # themselves a certificate, and cannot remove the lock that stops them.
+      - resources: ["role", "user", "token", "cert_authority", "lock"]
+        verbs: ["create", "update", "delete"]

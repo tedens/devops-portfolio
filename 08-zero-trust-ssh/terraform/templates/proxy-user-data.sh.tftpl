@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+#
+# Bootstraps the Teleport auth and proxy service.
+#
+# The previous version of this project told you to SSH in and run
+# "curl https://get.gravitational.com/teleport.tar.gz | tar -xz". That is an
+# unauthenticated pipe into tar as root, on the host that holds the audit
+# trail. This installs a pinned version from the signed package repository
+# instead, and nobody logs in to do it.
+
+set -euo pipefail
+
+exec > >(tee /var/log/teleport-bootstrap.log) 2>&1
+
+TELEPORT_VERSION="${teleport_version}"
+CLUSTER_NAME="${cluster_name}"
+PUBLIC_ADDR="${public_addr}"
+REGION="${region}"
+RECORDINGS_BUCKET="${recordings_bucket}"
+AUDIT_LOG_GROUP="${audit_log_group}"
+GITHUB_SECRET_ARN="${github_secret_arn}"
+JOIN_TOKEN_ARN="${join_token_arn}"
+
+dnf install -y jq
+
+# Signed repository, GPG check left on. The version is pinned so that two
+# applies a week apart produce the same cluster.
+dnf install -y "https://cdn.teleport.dev/teleport-$${TELEPORT_VERSION}-1.x86_64.rpm"
+
+install -d -m 0700 /var/lib/teleport
+install -d -m 0755 /etc/teleport
+
+%{ if acme_enabled ~}
+ACME_BLOCK=$(cat <<'YAML'
+  acme:
+    enabled: true
+    email: ${acme_email}
+YAML
+)
+%{ else ~}
+# No public name was given, so Teleport generates a self-signed certificate.
+# tsh will refuse it without --insecure, which is the correct behaviour and
+# the reason this is not a mode to leave running.
+ACME_BLOCK=""
+%{ endif ~}
+
+cat > /etc/teleport/teleport.yaml <<YAML
+version: v3
+
+teleport:
+  nodename: $${CLUSTER_NAME}-proxy
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+    format:
+      output: json
+
+auth_service:
+  enabled: true
+  cluster_name: $${CLUSTER_NAME}
+
+  # Loopback only. The auth service is the certificate authority for the whole
+  # cluster; the proxy is what is meant to be reachable, not this. The previous
+  # config listened on 0.0.0.0:3025.
+  listen_addr: 127.0.0.1:3025
+
+  proxy_listener_mode: multiplex
+
+  authentication:
+    type: github
+    second_factor: webauthn
+    webauthn:
+      rp_id: $${PUBLIC_ADDR}
+    # Re-prompt for the hardware key at the moment a session starts, not just
+    # at login. A stolen laptop with a live session is the case this covers.
+    require_session_mfa: true
+    device_trust:
+      mode: optional
+
+  session_recording: node-sync
+  proxy_checks_host_keys: true
+
+  audit_events_uri:
+    - "stdout://"
+  audit_sessions_uri: "s3://$${RECORDINGS_BUCKET}/records?region=$${REGION}"
+
+proxy_service:
+  enabled: true
+  web_listen_addr: 0.0.0.0:443
+  public_addr: $${PUBLIC_ADDR}:443
+$${ACME_BLOCK}
+
+# The proxy host runs no workloads and is not a jump box. Turning its own SSH
+# service off means there is nothing to land on here even with a valid
+# certificate; the protected nodes are the targets.
+ssh_service:
+  enabled: false
+YAML
+
+chmod 0600 /etc/teleport/teleport.yaml
+
+systemctl enable --now teleport
+
+# Wait for the auth service to come up before asking it to do anything.
+for _ in $(seq 1 60); do
+  if tctl status >/dev/null 2>&1; then break; fi
+  sleep 5
+done
+
+# Pre-create the join token the node will use, from the value Terraform
+# generated. Static tokens in the config file are the usual way to do this and
+# the wrong one: they live on disk forever and never expire.
+JOIN_TOKEN=$(aws secretsmanager get-secret-value \
+  --region "$${REGION}" --secret-id "$${JOIN_TOKEN_ARN}" \
+  --query SecretString --output text)
+
+tctl tokens add --type=node --value="$${JOIN_TOKEN}" --ttl=1h >/dev/null
+unset JOIN_TOKEN
+
+# Roles first: the connector maps a GitHub team onto ssh-operator by name, so
+# the role has to exist before the connector is created.
+install -d -m 0755 /etc/teleport/roles
+
+cat > /etc/teleport/roles/ssh-operator.yaml <<'YAML'
+${ssh_operator_role}
+YAML
+
+cat > /etc/teleport/roles/auditor.yaml <<'YAML'
+${auditor_role}
+YAML
+
+tctl create -f /etc/teleport/roles/ssh-operator.yaml
+tctl create -f /etc/teleport/roles/auditor.yaml
+
+# The GitHub connector is rendered here, from Secrets Manager, and deleted
+# immediately. It is never written to a file that survives this script and
+# never committed.
+if aws secretsmanager get-secret-value --region "$${REGION}" \
+     --secret-id "$${GITHUB_SECRET_ARN}" --query SecretString --output text \
+     > /dev/null 2>&1; then
+
+  CONNECTOR=$(mktemp)
+  chmod 0600 "$${CONNECTOR}"
+  trap 'shred -u "$${CONNECTOR}" 2>/dev/null || rm -f "$${CONNECTOR}"' EXIT
+
+  aws secretsmanager get-secret-value --region "$${REGION}" \
+    --secret-id "$${GITHUB_SECRET_ARN}" --query SecretString --output text \
+  | jq -r --arg addr "$${PUBLIC_ADDR}" '
+      "kind: github\nversion: v3\nmetadata:\n  name: github\nspec:\n" +
+      "  client_id: \(.client_id)\n" +
+      "  client_secret: \(.client_secret)\n" +
+      "  redirect_url: https://\($addr)/v1/webapi/github/callback\n" +
+      "  display: GitHub\n" +
+      "  teams_to_roles:\n" +
+      "    - organization: \(.organization)\n" +
+      "      team: \(.team)\n" +
+      "      roles: [\"ssh-operator\"]\n"
+    ' > "$${CONNECTOR}"
+
+  tctl create -f "$${CONNECTOR}"
+else
+  echo "No GitHub OAuth secret populated yet; skipping connector."
+  echo "Put client_id, client_secret, organization and team into the secret,"
+  echo "then run: tctl create -f <connector>"
+fi
+
+echo "bootstrap complete"

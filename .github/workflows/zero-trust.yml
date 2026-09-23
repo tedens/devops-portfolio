@@ -1,0 +1,98 @@
+name: Zero-trust SSH
+
+# The point of this workflow is that the README's claims are checked rather
+# than believed. The previous version of project 08 said "no permanent keys"
+# and "deployed to a private subnet" while its Terraform required an SSH key
+# pair and put the host on a public subnet with port 22 open to the internet.
+# Nothing caught it for a year.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '08-zero-trust-ssh/**'
+      - '.github/workflows/zero-trust.yml'
+  pull_request:
+    paths:
+      - '08-zero-trust-ssh/**'
+      - '.github/workflows/zero-trust.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Configuration claims
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The negative test replays the pre-rewrite Terraform out of history
+          # to prove the checks can still fail.
+          fetch-depth: 0
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+
+      - name: terraform fmt
+        run: terraform -chdir=08-zero-trust-ssh/terraform fmt -check -recursive
+
+      - name: terraform validate
+        run: |
+          terraform -chdir=08-zero-trust-ssh/terraform init -backend=false -input=false
+          terraform -chdir=08-zero-trust-ssh/terraform validate
+
+      - name: Bootstrap scripts are valid shell
+        run: |
+          # The templates are rendered with placeholder values so the result
+          # can be parsed. A syntax error in user_data does not fail an apply;
+          # it fails silently at boot, on the host you can no longer SSH into.
+          mkdir -p /tmp/render && cd /tmp/render
+          cat > main.tf <<'TF'
+          variable "d" { type = string }
+          output "proxy" {
+            value = templatefile("${var.d}/terraform/templates/proxy-user-data.sh.tftpl", {
+              teleport_version = "0.0.0", cluster_name = "c", public_addr = "example.com",
+              acme_enabled = true, acme_email = "a@example.com", region = "us-east-2",
+              recordings_bucket = "b", audit_log_group = "g",
+              github_secret_arn = "arn:s", join_token_arn = "arn:t",
+              ssh_operator_role = file("${var.d}/teleport/roles/ssh-operator.yaml"),
+              auditor_role      = file("${var.d}/teleport/roles/auditor.yaml"),
+            })
+          }
+          output "node" {
+            value = templatefile("${var.d}/terraform/templates/node-user-data.sh.tftpl", {
+              teleport_version = "0.0.0", proxy_addr = "example.com",
+              region = "us-east-2", join_token_arn = "arn:t",
+            })
+          }
+          TF
+          terraform init -backend=false >/dev/null
+          terraform apply -auto-approve -var "d=$GITHUB_WORKSPACE/08-zero-trust-ssh" >/dev/null
+          terraform output -raw proxy > proxy.sh
+          terraform output -raw node  > node.sh
+          bash -n proxy.sh
+          bash -n node.sh
+
+      - name: Teleport roles are valid YAML
+        run: |
+          for f in 08-zero-trust-ssh/teleport/roles/*.yaml; do
+            ruby -ryaml -e 'YAML.load_file(ARGV[0])' "$f"
+            echo "ok $f"
+          done
+
+      - name: Claims hold
+        run: 08-zero-trust-ssh/scripts/verify-no-ssh.sh
+
+      - name: Claims would have caught the old code
+        run: |
+          # Without this, a check that silently stops matching still reports
+          # ten green ticks.
+          old=$(mktemp -d)
+          first=$(git log --diff-filter=A --format=%H -- 08-zero-trust-ssh/terraform/main.tf | tail -1)
+          git show "$first:08-zero-trust-ssh/terraform/main.tf" > "$old/main.tf"
+          08-zero-trust-ssh/scripts/verify-no-ssh.sh --expect-fail "$old"

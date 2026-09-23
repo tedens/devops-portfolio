@@ -12,39 +12,6 @@
   ],
   "accepted": [
     {
-      "fingerprint": "08-zero-trust-ssh|terraform.network|aws_security_group.teleport_sg",
-      "finding": "Admin port 22 reachable from 0.0.0.0/0",
-      "reason": "Teleport's own proxy listens on 3023-3026 and should be the only ingress. The port 22 rule is left over from the initial build and is not needed.",
-      "risk": "high",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-10-22",
-      "ticket": "PORTFOLIO-8",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|terraform.identity|aws_instance.teleport_bastion",
-      "finding": "IMDSv2 not pinned on the bastion",
-      "reason": "Pre-dates the policy. Low exploitability while the host runs no untrusted workload, but it is a one-line fix.",
-      "risk": "high",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-10-22",
-      "ticket": "PORTFOLIO-9",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|terraform.logging|aws_vpc.teleport",
-      "finding": "No VPC flow log",
-      "reason": "Teleport records the sessions themselves, which is the higher-value audit trail. Flow logs are still wanted for AU-1.",
-      "risk": "medium",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-12-01",
-      "ticket": "PORTFOLIO-10",
-      "decision": "remediate"
-    },
-    {
       "fingerprint": "10-automated-dr-sim|terraform.logging|aws_vpc.dr",
       "finding": "No VPC flow log on the drill VPC",
       "reason": "The drill VPC exists for roughly fifteen minutes per month and has no route to the internet. Flow logs would cost more than the drill.",
@@ -133,61 +100,6 @@
       "decision": "remediate"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|AWS-0107|aws_security_group.teleport_sg",
-      "finding": "SSH open to the internet (trivy's view of the same issue as the policy finding)",
-      "reason": "Duplicate of the terraform.network finding. The port 22 rule should simply be removed; Teleport listens on 3023-3026.",
-      "risk": "high",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-10-22",
-      "ticket": "PORTFOLIO-8",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|AWS-0028|aws_instance.teleport_bastion",
-      "finding": "IMDSv1 allowed on the bastion (trivy's view of the policy finding)",
-      "reason": "Duplicate of the terraform.identity finding.",
-      "risk": "high",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-10-22",
-      "ticket": "PORTFOLIO-9",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|AWS-0131|aws_instance.teleport_bastion",
-      "finding": "Unencrypted root volume on the bastion",
-      "reason": "The bastion holds session recordings before they are shipped, so this is data at rest. One-line fix.",
-      "risk": "high",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-10-22",
-      "ticket": "PORTFOLIO-16",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|AWS-0104|aws_security_group.teleport_sg",
-      "finding": "Unrestricted egress from the Teleport security group",
-      "reason": "The proxy needs outbound for updates and the auth service. Should be narrowed to the endpoints it actually uses.",
-      "risk": "medium",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2027-01-15",
-      "ticket": "PORTFOLIO-17",
-      "decision": "remediate"
-    },
-    {
-      "fingerprint": "08-zero-trust-ssh|AWS-0164|aws_subnet.teleport_public",
-      "finding": "Public subnet assigns public IPs",
-      "reason": "The Teleport proxy is deliberately internet-facing; that is what it is for. The host behind it is not.",
-      "risk": "low",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2027-09-22",
-      "ticket": null,
-      "decision": "accept"
-    },
-    {
       "fingerprint": "09-karpenter-spot-nodes|KSV-0125|manifests/example-workload.yaml",
       "finding": "Image not from a registry on the default trusted list",
       "reason": "The image is public.ecr.aws, which is AWS's own registry. The check's default allow-list does not include it. Policy configuration issue, not a finding.",
@@ -232,17 +144,6 @@
       "decision": "accept"
     },
     {
-      "fingerprint": "08-zero-trust-ssh|AWS-0178|aws_vpc.teleport",
-      "finding": "No VPC flow log (trivy's view of the same issue as the policy finding)",
-      "reason": "Duplicate of the terraform.logging finding for this VPC. Both fingerprints are listed so either engine can run on its own. (Rule id changed in trivy 0.74; the old id mislabelled this as an autoscaling check.)",
-      "risk": "medium",
-      "owner": "tj",
-      "accepted": "2026-09-22",
-      "expires": "2026-12-01",
-      "ticket": "PORTFOLIO-10",
-      "decision": "remediate"
-    },
-    {
       "fingerprint": "10-automated-dr-sim|AWS-0178|aws_vpc.dr",
       "finding": "No VPC flow log on the drill VPC (trivy's view of the policy finding)",
       "reason": "Duplicate of the terraform.logging finding. The drill VPC lives for minutes and has no internet route. (Rule id changed in trivy 0.74; the old id mislabelled this as an autoscaling check.)",
@@ -252,6 +153,39 @@
       "expires": "2027-09-22",
       "ticket": null,
       "decision": "accept"
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AWS-0053|aws_lb.teleport",
+      "finding": "Load balancer is exposed to the internet",
+      "reason": "This is the design, not a mistake. An identity-aware proxy that is not reachable protects nothing; the point is that reaching it gets you a TLS handshake and a GitHub SSO prompt, not a shell. Nothing behind it is internet-facing: both instances are in private subnets with no public IP. Narrow allowed_web_cidrs if the operator population is known.",
+      "risk": "low",
+      "owner": "tj",
+      "accepted": "2026-09-22",
+      "expires": "2027-09-22",
+      "ticket": null,
+      "decision": "accept"
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AWS-0104|aws_vpc_security_group_egress_rule.proxy_https",
+      "finding": "Unrestricted egress destination on the proxy",
+      "reason": "Narrowed from the previous rule, which allowed every protocol to every address; this one is tcp/443 only. It still names 0.0.0.0/0 because the destinations are cdn.teleport.dev, the ACME directory and the GitHub OAuth endpoint, none of which publish a stable IP range. AWS API traffic already goes through VPC endpoints rather than here. The real fix is a forward proxy with a domain allowlist, which is more machinery than this cluster justifies today.",
+      "risk": "medium",
+      "owner": "tj",
+      "accepted": "2026-09-22",
+      "expires": "2027-03-22",
+      "ticket": "PORTFOLIO-17",
+      "decision": "remediate"
+    },
+    {
+      "fingerprint": "08-zero-trust-ssh|AWS-0104|aws_vpc_security_group_egress_rule.node_https",
+      "finding": "Unrestricted egress destination on the protected node",
+      "reason": "Same as the proxy rule: tcp/443 only, to the package repository and to the proxy itself. This one is the weaker case of the two, because a node's outbound set is small enough to enumerate once the image is pre-baked. Tracked under the same forward-proxy ticket.",
+      "risk": "medium",
+      "owner": "tj",
+      "accepted": "2026-09-22",
+      "expires": "2027-03-22",
+      "ticket": "PORTFOLIO-17",
+      "decision": "remediate"
     }
   ]
 }

@@ -51,7 +51,7 @@
 - id: zero-trust-ssh
   title: "Zero-Trust SSH Access"
   path: /08-zero-trust-ssh/
-  summary: "Short-lived SSH certificates behind GitHub SSO, with full session recording and audit."
+  summary: "Short-lived certificates behind GitHub SSO and a hardware second factor. No SSH keys, no open port 22, and no host reachable from the internet."
   category: Security & Access
   status: live
   featured: true

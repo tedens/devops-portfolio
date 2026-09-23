@@ -56,6 +56,58 @@ deny contains msg if {
 	)
 }
 
+# ---------------------------------------------------------------------------
+# The same two rules again, for aws_vpc_security_group_ingress_rule.
+#
+# These rules were written against the inline ingress block, which is the only
+# shape any project here used at the time. Rewriting 08 with the standalone
+# rule resources, which is what AWS now recommends, showed the gap: a rule
+# opening port 22 to 0.0.0.0/0 written the modern way passed the whole policy
+# clean. A control that only recognises the deprecated syntax is worse than no
+# control, because the dashboard is green either way.
+#
+# The standalone resource differs in three ways that matter here. It carries
+# one CIDR rather than a list, it names it cidr_ipv4 or cidr_ipv6 instead of
+# cidr_blocks, and ip_protocol = "-1" means every port with no from_port or
+# to_port present at all.
+# ---------------------------------------------------------------------------
+
+deny contains msg if {
+	rule := common.resources("aws_vpc_security_group_ingress_rule")[_]
+	rule_is_open(rule.body)
+	port := data_ports[_]
+	rule_covers_port(rule.body, port)
+	msg := sprintf(
+		"CRITICAL aws_vpc_security_group_ingress_rule.%s allows data port %d from the internet. Set referenced_security_group_id instead of a CIDR.",
+		[rule.name, port],
+	)
+}
+
+deny contains msg if {
+	rule := common.resources("aws_vpc_security_group_ingress_rule")[_]
+	rule_is_open(rule.body)
+	port := admin_ports[_]
+	rule_covers_port(rule.body, port)
+	msg := sprintf(
+		"HIGH aws_vpc_security_group_ingress_rule.%s allows admin port %d from the internet. Front it with an identity-aware proxy.",
+		[rule.name, port],
+	)
+}
+
+rule_is_open(body) if body.cidr_ipv4 in open_cidrs
+
+rule_is_open(body) if body.cidr_ipv6 in open_cidrs
+
+# "-1" is every protocol on every port. AWS rejects from_port and to_port
+# alongside it, so a range check would never fire and the rule would be missed.
+rule_covers_port(body, _) if body.ip_protocol == "-1"
+
+rule_covers_port(body, port) if {
+	body.ip_protocol != "-1"
+	body.from_port <= port
+	body.to_port >= port
+}
+
 # A database addressable from the internet is one credential leak away from
 # being read, whatever the security group in front of it says.
 deny contains msg if {

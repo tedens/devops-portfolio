@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# Bootstraps a protected node.
+#
+# This host has no inbound security group rules. It reaches the proxy, opens a
+# reverse tunnel, and an operator's session arrives back down the connection
+# the node itself made. Nothing dials in.
+
+set -euo pipefail
+
+exec > >(tee /var/log/teleport-bootstrap.log) 2>&1
+
+TELEPORT_VERSION="${teleport_version}"
+PROXY_ADDR="${proxy_addr}"
+REGION="${region}"
+JOIN_TOKEN_ARN="${join_token_arn}"
+
+dnf install -y "https://cdn.teleport.dev/teleport-$${TELEPORT_VERSION}-1.x86_64.rpm"
+
+# The login the ssh-operator role is allowed to use. Not root, not ec2-user,
+# and with no sudoers entry: privilege comes from the role, not the account.
+id -u app >/dev/null 2>&1 || useradd --system --create-home --shell /bin/bash app
+
+install -d -m 0700 /var/lib/teleport
+
+JOIN_TOKEN=$(aws secretsmanager get-secret-value \
+  --region "$${REGION}" --secret-id "$${JOIN_TOKEN_ARN}" \
+  --query SecretString --output text)
+
+cat > /etc/teleport/teleport.yaml <<YAML
+version: v3
+
+teleport:
+  nodename: $(hostname)
+  data_dir: /var/lib/teleport
+
+  # The token is consumed once at first start to obtain a host certificate,
+  # which is what the node authenticates with from then on.
+  auth_token: $${JOIN_TOKEN}
+
+  proxy_server: $${PROXY_ADDR}:443
+
+  log:
+    output: stderr
+    severity: INFO
+
+auth_service:
+  enabled: false
+
+proxy_service:
+  enabled: false
+
+ssh_service:
+  enabled: true
+  labels:
+    env: demo
+    role: workload
+YAML
+
+chmod 0600 /etc/teleport/teleport.yaml
+unset JOIN_TOKEN
+
+systemctl enable --now teleport
+
+# Once the host certificate is in the data directory the token in the config
+# is spent and worth nothing, but leaving a credential-shaped string on disk
+# is still how they end up in a support bundle.
+sleep 30
+sed -i '/auth_token:/d' /etc/teleport/teleport.yaml
+
+echo "bootstrap complete"

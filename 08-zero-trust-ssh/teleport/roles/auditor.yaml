@@ -1,0 +1,23 @@
+# Read-only replay. Whoever reviews the recordings should not also be able to
+# create sessions, and separating the two is what makes the review meaningful.
+kind: role
+version: v7
+metadata:
+  name: auditor
+  description: "Replay recorded sessions and read audit events. No shell access."
+spec:
+  options:
+    max_session_ttl: 8h
+    require_session_mfa: true
+
+  allow:
+    # No logins and no node labels: this role cannot open a session anywhere.
+    rules:
+      - resources: ["session", "event"]
+        verbs: ["read", "list"]
+
+  deny:
+    logins: ["*"]
+    rules:
+      - resources: ["session"]
+        verbs: ["delete"]

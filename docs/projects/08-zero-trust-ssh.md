@@ -2,84 +2,178 @@
 title: "Zero-Trust SSH Access"
 layout: page
 permalink: /08-zero-trust-ssh/
+description: "An SSH gateway with no SSH keys, no open port 22, and no host reachable from the internet. Rebuilt after the compliance gate found nine findings on the project named for zero trust."
 ---
 
-This project implements a modern, zero-trust SSH gateway using Teleport, replacing traditional SSH key-based access with short-lived certificates, GitHub SSO integration, and full session audit logging to CloudWatch.
+An SSH gateway with no SSH keys, no open port 22, and no host that can be
+reached from the internet. Access is a short-lived certificate issued after
+GitHub SSO and a hardware second factor, every session is recorded before it
+can start, and the recording cannot be deleted by the person in it.
 
-## Use Case
+## Why it was rebuilt
 
-Managing long-lived SSH keys at scale is error-prone and insecure. This project demonstrates how to eliminate static credentials entirely, enforce role-based access with your GitHub org, and maintain audit compliance through real-time log forwarding.
+The first version claimed all of that and did none of it. The
+[compliance gate]({{ site.baseurl }}/15-compliance-as-code/) was pointed at
+this repository and returned nine findings here, on the project named for
+zero trust.
 
----
+| What the page said | What the Terraform did |
+|---|---|
+| "no permanent keys" | required an EC2 key pair, and printed `ssh ubuntu@<ip>` as a Terraform output |
+| "deployed to a private subnet" | public subnet, `map_public_ip_on_launch = true` |
+| "eliminates long-lived keys" | port 22 open to `0.0.0.0/0` |
+| implied hardening | IMDSv1 allowed, unencrypted root volume, no flow log |
 
-## Components
+None of it was subtle. It survived because nothing ever checked. Prose does
+not fail a build, and that is the argument for everything below.
 
-- Teleport OSS: Access proxy, SSH server, and certificate authority all in one
-- Terraform: Provisions a secure VPC, subnet, security group, and EC2 bastion
-- GitHub SSO: Short-lived cert issuance with role mapping via GitHub teams
-- CloudWatch Logs: Session logs and audit trails streamed for compliance
+## How access works now
 
----
+```
+operator
+  |  tsh login, GitHub SSO, hardware key
+  v
+network load balancer :443        public subnet, TLS passed through untouched
+  |
+  v
+Teleport proxy + auth             private subnet, no public IP
+  ^
+  |  reverse tunnel, dialled outbound by the node
+  |
+protected node                    private subnet, no ingress rules at all
+```
 
-## Project Structure
+Three consequences of that shape are the whole design:
 
-- terraform/: Infrastructure code for VPC, EC2, and security group
-- teleport.yaml: Main configuration file enabling auth, proxy, and SSH services
-- github-connector.yaml: GitHub OAuth and team-to-role mapping
-- roles/: (Optional) Custom Teleport roles and RBAC definitions
+**The protected node's security group has no ingress rule of any kind.** The
+agent dials the proxy and holds the connection open, so an operator's session
+arrives back down a socket the node itself opened. Nothing reaches the node
+from outside, including the proxy, including you.
 
----
+**The auth service listens on `127.0.0.1`.** It is the certificate authority
+for the cluster; the proxy is what is meant to be reachable. The previous
+config had it on `0.0.0.0:3025`.
 
-## Setup Steps
+**Everything is multiplexed onto 443.** The old security group opened 3023 to
+3026 to the internet as well. None of that is needed, so none of it is open.
 
-1. Deploy infrastructure with Terraform:
+TLS is passed through the load balancer rather than terminated there, because
+terminating it would hide the client certificate that `tsh` authenticates
+with.
+
+Break-glass, for when Teleport itself is the broken thing, is SSM Session
+Manager over VPC interface endpoints: logged to CloudTrail, no inbound rule,
+and still no SSH key anywhere in the stack.
+
+## What the roles actually permit
+
+The old connector mapped an entire GitHub team onto Teleport's built-in
+`admin` role, which can delete the audit log it is recorded in. That is not an
+access control.
+
+`ssh-operator` can open a session on nodes labelled `env: demo, role:
+workload`, as the `app` user, for eight hours. It cannot be `root` or
+`ec2-user`, cannot forward ports or an agent, and cannot create or edit roles,
+users, tokens, certificate authorities or locks. `require_session_mfa`
+re-prompts for the hardware key at the moment a session starts rather than
+only at login, which is the difference that matters when a laptop is stolen
+with a live session on it.
+
+`record_session: strict` means a session that cannot be recorded does not
+begin. Without it, an operator who can break the upload gets an unrecorded
+shell, and that is the one session anybody would want unrecorded.
+
+`auditor` can replay recordings and read audit events, and has no logins at
+all. Whoever reviews the recordings should not also be able to create them.
+
+## Secrets stopped living in the repository
+
+The old connector file carried `client_id` and `client_secret` as inline
+placeholders. Placeholders, but the shape is the problem: the first person to
+make it work commits a live OAuth secret to a public repository.
+
+Both the OAuth credentials and the node join token now come from Secrets
+Manager under the project's KMS key. The connector is rendered on the host at
+boot with mode 0600 and shredded when the bootstrap script exits. The join
+token is generated by Terraform, never typed, and stripped out of the node's
+config file once the host certificate has been issued.
+
+The install step changed for the same reason. The old instructions were to SSH
+in and run `curl https://get.gravitational.com/teleport.tar.gz | tar -xz`, an
+unauthenticated pipe into tar as root, on the host that holds the audit trail.
+It is now a pinned version from the signed package repository, installed by
+cloud-init, with nobody logging in to do it.
+
+## Checking the claims instead of believing them
 
 ```bash
-cd terraform
-terraform init
-terraform apply
+./scripts/verify-no-ssh.sh
 ```
-2. Install Teleport on the bastion host:
 
-```bash
-curl https://get.gravitational.com/teleport.tar.gz | tar -xz
-sudo ./install
+Ten checks against the Terraform source: no port 22 anywhere, no key pair, no
+public IPs, IMDSv2 on every instance, encrypted root volumes, a flow log, no
+all-protocol rule, no inline security group blocks, no credential-shaped
+literal committed, and no ingress rule on the protected node. No AWS account
+is needed, because these are properties of the configuration.
+
+A check that has quietly stopped matching still prints a green tick, so the
+checks are themselves tested. `--expect-fail` runs them against the original
+`main.tf` pulled out of git history and succeeds only if they fail:
+
 ```
-3. Configure and run Teleport:
-
-```bash
-sudo cp teleport.yaml /etc/teleport/teleport.yaml
-sudo teleport start
+as expected, 8 of 10 checks failed:
+  no ingress rule opens port 22 anywhere
+  no EC2 key pair is referenced
+  no instance or subnet takes a public IP
+  IMDSv2 is required on every instance
+  every root volume is encrypted
+  the VPC has a flow log
+  no security group rule allows every protocol
+  no inline ingress or egress blocks
 ```
-4. Create GitHub connector:
 
-```bash
-sudo tctl create -f github-connector.yaml
-```
-5. Login via web UI:
+Writing that check found a bug in itself first. The pattern for the node's
+ingress rule was unanchored, and `referenced_security_group_id` ends with the
+same word as `security_group_id`, so the rule letting the node reach SSM read
+as an ingress rule on the node. An earlier version had a worse one: piping
+into `grep -q` under `set -o pipefail` returns 141 when grep closes the pipe
+early, which turned negated checks into passes for the wrong reason.
 
-Open https://<bastion-public-ip>/ and authenticate with GitHub
+## What the rewrite exposed in the policy itself
 
----
+The new code uses `aws_vpc_security_group_ingress_rule`, the standalone
+resource AWS now recommends, rather than inline `ingress` blocks. The Rego in
+project 15 had only ever been written against the inline block, because that
+was the only shape any project here used.
 
-## Security & Audit Features
+So a rule opening port 22 to `0.0.0.0/0`, written the modern way, passed the
+entire policy clean. A control that recognises only the deprecated syntax is
+worse than no control, because the dashboard is green either way. The policy
+now covers both shapes, including `ip_protocol = "-1"`, which carries no port
+range at all and would slip past a naive range check. Eight new unit tests,
+taking the suite from 30 to 38.
 
-- No static SSH keys
-- GitHub SSO for identity and role mapping
-- Short-lived access certificates
-- Session recording + audit log streaming to CloudWatch
-- IAM-scoped instance permissions for minimal surface
+## Result
 
----
+All nine findings on this project are gone. Three remain against the new
+components and each is written down rather than suppressed: the load balancer
+is deliberately internet-facing, which is what an identity-aware proxy is for,
+and two egress rules still name `0.0.0.0/0` because `cdn.teleport.dev`, the
+ACME directory and GitHub's OAuth endpoint publish no stable IP range. Those
+two are narrowed from every protocol to tcp/443 and carry a ticket for the
+forward proxy that would close them properly.
 
-## Extend This Project
+Across the repository, findings went from 23 to 17.
 
-- Enable S3 archiving for long-term session log storage
-- Set up per-node RBAC with label matching
-- Integrate with Okta or another OIDC provider
-- Deploy a multi-node Teleport cluster (proxy + auth + nodes)
-- Automate deployment with userdata or Ansible
+## What has and has not been run
 
----
+The Terraform validates and formats clean and passes the policy gate. The
+bootstrap templates render, their output parses as shell, and the Teleport
+configuration they generate parses as YAML with the expected structure. CI
+runs all of that plus both directions of the claim checks.
 
-This project reflects a shift toward secure, scalable access control in production-grade environments, with a focus on visibility, traceability, and audit readiness.
+It has not been applied against a live AWS account. Two NAT gateways and a
+network load balancer are charged hourly whether or not anyone logs in, and
+this is a portfolio repository rather than something with a budget. The claims
+above are claims about the configuration, which is what the checks test, and
+not a report from a running cluster.
