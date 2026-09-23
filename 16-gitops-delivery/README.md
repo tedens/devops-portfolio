@@ -134,6 +134,22 @@ replica count, so clients must call the unpinned one. The load generator
 originally called `demo-service-stable`, which sends nothing to the canary,
 and an unmeasured canary is promoted rather than rejected.
 
+**A fourth, found only by running the real path.** `up.sh --local` applies
+the manifests with `kubectl apply -f <dir>`, which goes in filename order, so
+`analysistemplate.yaml` lands before `rollout.yaml`. Argo CD does not order a
+directory that way, and the Rollout arrived first:
+
+```
+InvalidSpec: spec.strategy.canary.analysis.templates:
+Invalid value: "success-rate": AnalysisTemplate 'success-rate' not found
+```
+
+It recovers once the template appears, but until then the Rollout is rejected
+and on a first deploy nothing runs. `argocd.argoproj.io/sync-wave` now orders
+them explicitly. The lesson is about the shortcut rather than the annotation:
+`--local` is convenient and is not the thing being shipped, so CI runs the
+app of apps against `main` as a separate job.
+
 ## Argo CD and Argo Rollouts disagree by default
 
 The two Services above are the seam between them. Rollouts injects

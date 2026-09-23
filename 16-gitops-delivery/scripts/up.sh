@@ -98,8 +98,21 @@ else
 	log "applying the app of apps"
 	kubectl apply -f apps/root.yaml
 	echo "Argo CD will now pull $(grep -m1 repoURL apps/root.yaml | awk '{print $2}')"
-	echo "Children appear once it has synced; watch with:"
-	echo "  kubectl -n argocd get applications -w"
+
+	# Waiting matters here. Without it the next step looks for a namespace
+	# Argo CD has not created yet and the script fails on a cluster that is
+	# perfectly fine, thirty seconds from being ready.
+	echo "waiting for the children to be created and synced"
+	for _ in $(seq 1 60); do
+		apps=$(kubectl -n argocd get applications -o name 2>/dev/null | wc -l | tr -d " ")
+		synced=$(kubectl -n argocd get applications \
+			-o jsonpath='{range .items[*]}{.status.sync.status}{"\n"}{end}' 2>/dev/null |
+			grep -c Synced || true)
+		[[ "$apps" -ge 3 && "$synced" -ge 3 ]] && break
+		sleep 5
+	done
+	kubectl -n argocd get applications \
+		-o custom-columns='NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status'
 fi
 
 log "waiting for the workload"

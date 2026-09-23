@@ -124,6 +124,24 @@ unpinned one. The load generator originally called `demo-service-stable`,
 which sends nothing at all to the canary, and an unmeasured canary is
 promoted rather than rejected.
 
+### A fourth, visible only on the real path
+
+`up.sh --local` applies the manifests with `kubectl apply` on a directory,
+which goes in filename order, so the AnalysisTemplate lands before the
+Rollout. Argo CD does not order a directory that way, and the Rollout arrived
+first:
+
+```
+InvalidSpec: spec.strategy.canary.analysis.templates:
+Invalid value: "success-rate": AnalysisTemplate 'success-rate' not found
+```
+
+It recovers once the template appears, but until then the Rollout is rejected
+and on a first deploy nothing is running. Sync waves order them explicitly
+now. The lesson is about the shortcut rather than the annotation: the
+convenient path is not the one being shipped, so CI runs the app of apps
+against `main` as its own job.
+
 ## Argo CD and Argo Rollouts disagree by default
 
 Those two pinned Services are the seam between the controllers. Rollouts

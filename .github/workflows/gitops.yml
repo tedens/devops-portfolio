@@ -128,3 +128,61 @@ jobs:
           kubectl -n demo get endpointslice -o wide || true
           kubectl -n monitoring logs deploy/prometheus --tail=50 || true
           kubectl -n argo-rollouts logs deploy/argo-rollouts --tail=100 || true
+
+  gitops-path:
+    name: App of apps against main
+    # Only after merge: Argo CD pulls this repository at main, so on a pull
+    # request it would sync code that is not the code under test.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: manifests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: gitops-demo
+          node_image: kindest/node:v1.31.4
+
+      - name: Bring up through Argo CD
+        working-directory: 16-gitops-delivery
+        run: ./scripts/up.sh
+
+      - name: Every Application is Synced and Healthy
+        run: |
+          # The --local path applies the directory with kubectl, which goes in
+          # filename order. Argo CD does not, and that difference produced a
+          # Rollout referencing an AnalysisTemplate that did not exist yet.
+          # It self-healed, so only a check on the real path catches it.
+          for _ in $(seq 1 60); do
+            bad=$(kubectl -n argocd get applications -o json | jq -r '
+              [.items[] | select(.status.sync.status != "Synced"
+                                 or .status.health.status != "Healthy")
+               | .metadata.name] | join(",")')
+            [ -z "$bad" ] && { echo "all Applications Synced and Healthy"; exit 0; }
+            sleep 10
+          done
+          echo "not settled: $bad"
+          kubectl -n argocd get applications -o wide
+          kubectl -n demo get rollout demo-service -o jsonpath='{.status.message}'
+          exit 1
+
+      - name: The Rollout never went InvalidSpec
+        run: |
+          # Sync waves put the AnalysisTemplate in before the Rollout. If the
+          # ordering regresses, this is the message that comes back.
+          if kubectl -n demo get rollout demo-service -o yaml | grep -q "InvalidSpec"; then
+            echo "the Rollout was rejected; check the sync-wave annotations"
+            kubectl -n demo get rollout demo-service -o yaml | grep -B2 -A2 InvalidSpec
+            exit 1
+          fi
+          echo "no InvalidSpec"
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n argocd get applications -o yaml || true
+          kubectl -n argocd logs deploy/argocd-application-controller --tail=100 || true
+          kubectl -n demo get all || true

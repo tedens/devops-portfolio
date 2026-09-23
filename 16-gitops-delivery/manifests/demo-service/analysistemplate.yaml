@@ -21,6 +21,21 @@ kind: AnalysisTemplate
 metadata:
   name: success-rate
   namespace: demo
+  annotations:
+    # Created before the Rollout that references it.
+    #
+    # Argo CD does not apply a directory in filename order, and a Rollout
+    # naming an AnalysisTemplate that does not exist yet is rejected outright:
+    #
+    #   InvalidSpec: spec.strategy.canary.analysis.templates:
+    #   Invalid value: "success-rate": AnalysisTemplate 'success-rate' not found
+    #
+    # It recovers once the template lands, but the Rollout sits Degraded until
+    # then, and on a first deploy that is the window where nothing is running.
+    # This bug is invisible to scripts/up.sh --local, because kubectl apply on
+    # a directory does go in filename order and analysistemplate sorts before
+    # rollout. The shortcut hid it; only the real path showed it.
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   args:
     - name: service-name
