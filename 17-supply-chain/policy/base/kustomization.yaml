@@ -1,0 +1,3 @@
+resources:
+  - registry-allowlist.yaml
+  - image-policy.yaml

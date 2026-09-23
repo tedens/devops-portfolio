@@ -3,6 +3,17 @@
 # be hardcoded in the layout as well, and the two had already drifted: 09 and
 # 10 were in the menu but missing here, so they never appeared on the homepage.
 
+- id: supply-chain
+  title: "Supply Chain Security"
+  path: /17-supply-chain/
+  summary: "Every build signed with the workflow's own identity, SBOM and SLSA provenance attached, and an admission controller that refuses anything not signed by that identity, attested by that builder, and built from this repository."
+  category: Security & Access
+  status: live
+  featured: true
+  year: 2026
+  stack: [cosign, Sigstore, SLSA, Kyverno, syft, Kubernetes]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/17-supply-chain
+
 - id: gitops-delivery
   title: "GitOps Delivery"
   path: /16-gitops-delivery/

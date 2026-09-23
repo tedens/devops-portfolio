@@ -1,0 +1,17 @@
+# A cluster whose containerd trusts the local registry.
+#
+# Signatures and attestations are OCI artifacts stored next to the image, so
+# the image has to live in a registry: "kind load" puts bytes on a node and
+# leaves nothing for an admission controller to look up. The registry is a
+# plain-HTTP container on the docker network; config_path tells containerd
+# to read per-host settings from /etc/containerd/certs.d, which up.sh fills
+# in with a hosts.toml per name.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: supply-chain-demo
+nodes:
+  - role: control-plane
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"

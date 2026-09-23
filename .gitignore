@@ -32,3 +32,6 @@ __pycache__/
 # evidence/example-run.json; the timestamped bundles are not.
 15-compliance-as-code/evidence/*
 !15-compliance-as-code/evidence/example-run.json
+
+# Local supply-chain drill: throwaway signing keys and rendered policies.
+17-supply-chain/.local/

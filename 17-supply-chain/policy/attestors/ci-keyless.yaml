@@ -1,0 +1,29 @@
+# Who the cluster trusts in CI. Two identities, because two things sign.
+#
+# builder: this repository's supply-chain workflow, on main, authenticated by
+# GitHub's OIDC issuer. It signs the image and attests the SBOM. Not "anything
+# signed with cosign", not "anyone in the org": one workflow file on one
+# branch.
+#
+# provenance: the SLSA generator's reusable workflow, at a release tag. It
+# attests provenance with its own identity, which is the entire point. A
+# provenance statement signed by the same workflow that ran the build is a
+# claim the build makes about itself; one signed by the generator is a claim
+# made by a builder the workflow cannot impersonate.
+attestors:
+  - name: builder
+    cosign:
+      keyless:
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subject: https://github.com/tedens/devops-portfolio/.github/workflows/supply-chain.yml@refs/heads/main
+      ctlog:
+        url: https://rekor.sigstore.dev
+  - name: provenance
+    cosign:
+      keyless:
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: ^https://github\.com/slsa-framework/slsa-github-generator/\.github/workflows/generator_container_slsa3\.yml@refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$
+      ctlog:
+        url: https://rekor.sigstore.dev

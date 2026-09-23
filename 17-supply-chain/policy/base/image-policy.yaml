@@ -1,0 +1,115 @@
+# The gate. Two rules, and the order of them is the design.
+#
+# Rule one: images must come from this repository's registry path. A
+# verification policy scoped to "our images" says nothing about an image that
+# is not one of ours, so without this rule an attacker does not need to forge
+# a signature; they need to use a different name. Everything not on the list
+# is refused before signature checking is reached.
+#
+# Rule two: every image on the list carries a signature from the attestor
+# named in the overlay, plus an SBOM attestation and provenance attestation
+# from the same attestor. Who the attestor is differs by environment and is
+# the one thing the overlays change: a GitHub Actions workflow identity in
+# CI, a throwaway key pair in the local drill.
+#
+# mutateDigest rewrites the tag to the verified digest on admission, so what
+# runs is what was checked even if the tag moves afterwards.
+
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationActions: [Deny]
+  webhookConfiguration:
+    timeoutSeconds: 30
+  # Fail closed: if the webhook cannot be reached, nothing is admitted. The
+  # alternative admits everything during exactly the outage an attacker wants.
+  failurePolicy: Fail
+  evaluation:
+    background:
+      enabled: false
+
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values: ["demo"]
+
+  # Which images this policy verifies. Anything in the demo namespace that
+  # does not match is caught by the allowlist validation below, not skipped.
+  matchImageReferences:
+    - glob: "ALLOWED_REPOSITORY:*"
+    - glob: "ALLOWED_REPOSITORY@*"
+
+  # Replaced wholesale from policy/attestors/<mode>.yaml: two keyless
+  # identities in CI, one throwaway key standing in for both locally.
+  attestors:
+    - name: builder
+      cosign:
+        key:
+          data: OVERLAY_PROVIDES_ATTESTORS
+    - name: provenance
+      cosign:
+        key:
+          data: OVERLAY_PROVIDES_ATTESTORS
+
+  attestations:
+    - name: sbom
+      intoto:
+        type: https://spdx.dev/Document
+    - name: provenance
+      intoto:
+        # v0.2, not v1. The SLSA generator this repository uses (v2.1.0)
+        # still emits the v0.2 predicate, and an attestation of the wrong
+        # type is simply not found, which reads as "no provenance" rather
+        # than "wrong version".
+        type: https://slsa.dev/provenance/v0.2
+
+  validationConfigurations:
+    mutateDigest: true
+    verifyDigest: true
+    required: true
+
+  validations:
+    - expression: >-
+        images.containers.map(image,
+          verifyImageSignatures(image, [attestors.builder])).all(e, e > 0)
+      message: >-
+        image is not signed by the builder this cluster trusts
+
+    - expression: >-
+        images.containers.map(image,
+          verifyAttestationSignatures(image, attestations.sbom, [attestors.builder])).all(e, e > 0)
+      message: >-
+        image has no SBOM attestation from the trusted builder
+
+    - expression: >-
+        images.containers.map(image,
+          verifyAttestationSignatures(image, attestations.provenance, [attestors.provenance])).all(e, e > 0)
+      message: >-
+        image has no provenance attestation from the trusted provenance signer
+
+    # A valid provenance signature says who attested. These two say what they
+    # attested to: that the build was done by the builder this environment
+    # expects, from this repository's source. Without them, provenance for a
+    # completely different repository, signed by the same generator, would
+    # pass.
+    - expression: >-
+        images.containers.map(image,
+          extractPayload(image, attestations.provenance).predicate.builder.id
+            .startsWith("EXPECTED_BUILDER_ID_PREFIX")).all(e, e)
+      message: >-
+        provenance names a builder this environment does not expect
+    - expression: >-
+        images.containers.map(image,
+          extractPayload(image, attestations.provenance).predicate.invocation.configSource.uri
+            .startsWith("EXPECTED_SOURCE_URI_PREFIX")).all(e, e)
+      message: >-
+        provenance says the build came from somewhere other than this repository

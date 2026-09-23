@@ -1,0 +1,219 @@
+name: Supply chain
+
+# Builds the demo service, publishes it to GHCR, signs it with this
+# workflow's OIDC identity, attaches an SBOM, has the SLSA generator attest
+# provenance, and then proves an admission controller admits exactly that
+# image and refuses four look-alikes.
+#
+# The identity that signs here is what the cluster policy names:
+#   https://github.com/tedens/devops-portfolio/.github/workflows/supply-chain.yml@refs/heads/main
+# Rename this file, move the trigger to another branch, or sign from a
+# different workflow and every image stops being admitted. That is the
+# control working, not a bug.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '16-gitops-delivery/app/**'
+      - '17-supply-chain/**'
+      - '.github/workflows/supply-chain.yml'
+  pull_request:
+    paths:
+      - '17-supply-chain/**'
+      - '.github/workflows/supply-chain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/demo-service
+
+jobs:
+  policy:
+    name: Policies render and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Both renders parse and carry the right attestor
+        run: |
+          cd 17-supply-chain
+          printf -- '-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdummy\n-----END PUBLIC KEY-----\n' > /tmp/dummy.pub
+          ruby scripts/render-policy.rb local kind-registry:5000/demo-service /tmp/dummy.pub > /tmp/local.yaml
+          ruby scripts/render-policy.rb ci "$IMAGE" > /tmp/ci.yaml
+          ruby -ryaml -e 'YAML.load_stream(File.read("/tmp/local.yaml")){}; YAML.load_stream(File.read("/tmp/ci.yaml")){}'
+          # The CI render must never trust a plain-HTTP registry or skip the
+          # transparency log. Those two lines are the local drill's, only.
+          ! grep -qE 'allowInsecureRegistry|insecureIgnoreTlog' /tmp/ci.yaml
+          grep -q 'ghcr-pull' /tmp/ci.yaml
+          grep -q 'supply-chain.yml@refs/heads/main' /tmp/ci.yaml
+          echo "renders ok"
+
+  build-sign:
+    name: Build, sign, attest
+    # Only main publishes: a pull request from a fork must not be able to
+    # produce an image the policy would admit.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    needs: policy
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pins
+        id: pins
+        run: |
+          source 17-supply-chain/bootstrap/versions.env
+          echo "cosign=$COSIGN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "syft=$SYFT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "slsa=$SLSA_GENERATOR_VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: sigstore/cosign-installer@v4.1.2
+        with:
+          cosign-release: ${{ steps.pins.outputs.cosign }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: push
+        run: |
+          docker build --build-arg BUILD_VERSION="${GITHUB_SHA::7}" \
+            -t "$IMAGE:${GITHUB_SHA::7}" -t "$IMAGE:latest" 16-gitops-delivery/app
+          docker push "$IMAGE:${GITHUB_SHA::7}"
+          docker push "$IMAGE:latest"
+          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:${GITHUB_SHA::7}" | cut -d@ -f2)
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "pushed $IMAGE@$digest"
+
+      - name: Sign (keyless, logged to Rekor)
+        run: cosign sign --yes "$IMAGE@${{ steps.push.outputs.digest }}"
+
+      - uses: anchore/sbom-action@v0.24.2
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: false
+          syft-version: ${{ steps.pins.outputs.syft }}
+
+      - name: Attest SBOM
+        run: cosign attest --yes --type spdxjson --predicate sbom.spdx.json "$IMAGE@${{ steps.push.outputs.digest }}"
+
+      - name: SBOM as evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: sbom.spdx.json
+          retention-days: 90
+
+  provenance:
+    name: SLSA provenance
+    if: github.event_name != 'pull_request'
+    needs: build-sign
+    permissions:
+      actions: read
+      id-token: write
+      packages: write
+    # The builder attests, not this workflow. A provenance statement the
+    # workflow could write about itself is a claim, not provenance.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    with:
+      image: ghcr.io/${{ github.repository }}/demo-service
+      digest: ${{ needs.build-sign.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  admission-drill:
+    name: Admission drill against GHCR
+    if: github.event_name != 'pull_request'
+    needs: [build-sign, provenance]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pins
+        id: pins
+        run: |
+          source 17-supply-chain/bootstrap/versions.env
+          echo "cosign=$COSIGN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "crane=$CRANE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "kind_image=$KIND_NODE_IMAGE" >> "$GITHUB_OUTPUT"
+
+      - uses: sigstore/cosign-installer@v4.1.2
+        with:
+          cosign-release: ${{ steps.pins.outputs.cosign }}
+
+      - name: crane
+        run: |
+          curl -sSL "https://github.com/google/go-containerregistry/releases/download/${{ steps.pins.outputs.crane }}/go-containerregistry_Linux_x86_64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin crane
+
+      - name: Verify from outside the cluster first
+        run: 17-supply-chain/scripts/verify.sh "$IMAGE@${{ needs.build-sign.outputs.digest }}"
+
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: supply-chain-demo
+          config: 17-supply-chain/bootstrap/kind-config.yaml
+          node_image: ${{ steps.pins.outputs.kind_image }}
+
+      - name: Kyverno and the CI policy
+        run: |
+          cd 17-supply-chain
+          source bootstrap/versions.env
+          kubectl create namespace kyverno --dry-run=client -o yaml | kubectl apply -f -
+          kubectl apply --server-side --force-conflicts \
+            -f "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/install.yaml"
+          for d in kyverno-admission-controller kyverno-background-controller kyverno-cleanup-controller kyverno-reports-controller; do
+            kubectl -n kyverno rollout status "deploy/$d" --timeout=300s
+          done
+          kubectl create namespace demo --dry-run=client -o yaml | kubectl apply -f -
+          # Kyverno fetches signatures with its own credentials, not the
+          # kubelet's. The package is private until someone makes it public.
+          kubectl -n kyverno create secret docker-registry ghcr-pull \
+            --docker-server=ghcr.io --docker-username="${{ github.actor }}" \
+            --docker-password="${{ secrets.GITHUB_TOKEN }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          ruby scripts/render-policy.rb ci "$IMAGE" | kubectl apply -f -
+          sleep 10
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Five images at the door, one gets in
+        working-directory: 17-supply-chain
+        env:
+          REG_HOST: ghcr.io/${{ github.repository }}
+          REG_CLUSTER: ghcr.io/${{ github.repository }}
+          KEY: ""
+        run: |
+          # Cases 2, 3 and 5 are pushed here as unsigned/mis-signed tags on
+          # the same GHCR path; case 4 is skipped without a trusted key and
+          # is covered by case 2's unsigned push.
+          IMAGE="$IMAGE@${{ needs.build-sign.outputs.digest }}" ./scripts/tamper-drill.sh --ci
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n kyverno logs deploy/kyverno-admission-controller --tail=80 | grep -iE 'verif|attest|error' || true
+          kubectl get ivpol,vpol -o yaml || true

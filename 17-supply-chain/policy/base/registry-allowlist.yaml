@@ -1,0 +1,45 @@
+# Refuse any image that is not ours before the signature policy is consulted.
+#
+# ImageValidatingPolicy only evaluates images that match its
+# matchImageReferences; an image from docker.io simply does not match and
+# would be admitted untouched. This ValidatingPolicy closes that gap for the
+# demo namespace: every container, init container and ephemeral container
+# must reference the allowed repository.
+
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: allowed-registries-only
+spec:
+  validationActions: [Deny]
+  webhookConfiguration:
+    timeoutSeconds: 10
+  # Fail closed: if the webhook cannot be reached, nothing is admitted. The
+  # alternative admits everything during exactly the outage an attacker wants.
+  failurePolicy: Fail
+  evaluation:
+    background:
+      enabled: false
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values: ["demo"]
+  variables:
+    - name: allImages
+      expression: >-
+        object.spec.containers.map(c, c.image)
+        + (has(object.spec.initContainers) ? object.spec.initContainers.map(c, c.image) : [])
+        + (has(object.spec.ephemeralContainers) ? object.spec.ephemeralContainers.map(c, c.image) : [])
+  validations:
+    - expression: >-
+        variables.allImages.all(img, img.startsWith("ALLOWED_REPOSITORY"))
+      messageExpression: >-
+        "only images from ALLOWED_REPOSITORY are admitted here; got: " +
+        variables.allImages.filter(img, !img.startsWith("ALLOWED_REPOSITORY")).join(", ")
