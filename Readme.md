@@ -28,6 +28,7 @@ The full site with documentation, diagrams, and project deep-dives is published 
 | 15 | Compliance as Code | HIPAA and SOC 2 controls as policy, gated on every change, with expiring exceptions and a dated evidence trail. Runs against this repository. | [Docs](https://tedens.github.io/devops-portfolio/15-compliance-as-code/) |
 | 16 | GitOps Delivery | Argo CD pulls the repository, Argo Rollouts runs a canary gated on Prometheus, and a build that fails its measurements rolls itself back. The drill runs in CI. | [Docs](https://tedens.github.io/devops-portfolio/16-gitops-delivery/) |
 | 17 | Supply Chain Security | Every build signed with the workflow's own identity, SBOM and SLSA provenance attached, and an admission controller that refuses anything not signed by that identity, attested by that builder, and built from this repository. | [Docs](https://tedens.github.io/devops-portfolio/17-supply-chain/) |
+| 18 | SLOs and Alerting | Two SLOs, multi-window burn-rate alerts, page-or-ticket routing, a runbook per alert, and a drill that burns the budget on purpose and proves the page arrives, the redundant ticket is held, and the page clears. | [Docs](https://tedens.github.io/devops-portfolio/18-slo-alerting/) |
 
 <!-- END PROJECTS -->
 ---

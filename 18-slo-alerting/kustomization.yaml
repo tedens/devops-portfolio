@@ -1,0 +1,31 @@
+# Rules and routing become ConfigMaps straight from the files that are
+# unit-tested, so what promtool checked is what Prometheus loads. No copy,
+# no drift.
+#
+# This file sits at the project root, not in manifests/, because kustomize
+# refuses to read files above the kustomization directory and Argo CD builds
+# with that restriction on. Everything it needs is below here.
+#
+# Name hashing is off because Prometheus's Deployment (in project 16) mounts
+# the ConfigMap by name. The cost is that a rules change does not restart
+# Prometheus on its own; the reload endpoint is enabled and install.sh calls
+# it. Argo CD does the same through its ConfigMap hot-reload on sync.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: prometheus-rules
+    files:
+      - slo-recording.yaml=rules/slo-recording.yaml
+      - slo-alerts.yaml=rules/slo-alerts.yaml
+  - name: alertmanager-config
+    files:
+      - alertmanager.yml=alertmanager/alertmanager.yml
+
+resources:
+  - manifests/alertmanager.yaml
+  - manifests/alert-sink.yaml

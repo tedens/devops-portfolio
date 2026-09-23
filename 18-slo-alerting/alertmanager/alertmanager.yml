@@ -1,0 +1,49 @@
+# Routing. Two receivers, because two kinds of alert.
+#
+# A page wakes someone up; a ticket waits for the morning. Every alert here
+# carries a severity label and the tree below maps it to one of the two.
+# Anything without a severity lands on ticket, because an unclassified alert
+# paging someone at 3am is how alerts get muted.
+#
+# The inhibition rule is the other half of the design: while a page is
+# firing for a service and SLO, the slow-burn ticket for the same pair is
+# suppressed. The ticket is not wrong, it is redundant, and two notifications
+# for one problem teaches people to skim.
+
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: ticket
+  group_by: [alertname, service, slo]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers: [severity = page]
+      receiver: pager
+      # No batching delay on a page. The 30s default exists to group
+      # related alerts into one notification; for a page the first one is
+      # the one that matters.
+      group_wait: 0s
+      repeat_interval: 1h
+    - matchers: [severity = ticket]
+      receiver: ticket
+
+inhibit_rules:
+  - source_matchers: [severity = page]
+    target_matchers: [severity = ticket]
+    equal: [service, slo]
+
+receivers:
+  # Both are webhooks to an in-cluster sink so the drill can prove delivery
+  # by reading what arrived. Swapping in PagerDuty or Slack is a receiver
+  # change and nothing else.
+  - name: pager
+    webhook_configs:
+      - url: http://alert-sink.monitoring.svc.cluster.local:8080/pager
+        send_resolved: true
+  - name: ticket
+    webhook_configs:
+      - url: http://alert-sink.monitoring.svc.cluster.local:8080/ticket
+        send_resolved: true

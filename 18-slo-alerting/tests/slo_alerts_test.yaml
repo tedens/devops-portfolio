@@ -1,0 +1,231 @@
+# Unit tests for the rules. Offline, deterministic, seconds to run.
+#
+# Each case is a claim the page makes. "Fires when it should" is the easy
+# half; most of these are "stays silent when it should", because an alert
+# that fires on quiet is the one that gets muted, and a muted alert is no
+# alert at all.
+#
+# Series notation: '0+60x30' is a counter starting at 0 rising by 60 per
+# interval for 30 intervals. With a 1m interval that is 60 requests/minute.
+
+rule_files:
+  - ../rules/slo-recording.yaml
+  - ../rules/slo-alerts.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # -------------------------------------------------------------------------
+  - name: a broken build at 60% errors pages within minutes
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx",version="v1"}'
+        values: '0+40x30'
+      - series: 'http_requests_total{app="demo-service",status_class="5xx",version="v2"}'
+        values: '0+60x30'
+      - series: 'up{app="demo-service"}'
+        values: '1x30'
+    promql_expr_test:
+      - expr: round(slo:sli_error:ratio_rate5m{slo="availability"}, 0.001)
+        eval_time: 6m
+        exp_samples:
+          - labels: '{service="demo-service",slo="availability"}'
+            value: 0.6
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: ErrorBudgetBurnFast
+        exp_alerts:
+          - exp_labels:
+              alertname: ErrorBudgetBurnFast
+              severity: page
+              service: demo-service
+              slo: availability
+            exp_annotations:
+              summary: demo-service is burning its availability error budget fast
+              description: Error ratio is 60% over the last hour. At this rate the 30-day budget is gone in under two days.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnFast.md
+      # The slow alert must not also page for the same event.
+      - eval_time: 6m
+        alertname: ErrorBudgetBurnSlow
+        exp_alerts: []
+
+  # -------------------------------------------------------------------------
+  - name: healthy traffic at 0.05% errors is silent everywhere
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx"}'
+        values: '0+2000x180'
+      - series: 'http_requests_total{app="demo-service",status_class="5xx"}'
+        values: '0+1x180'
+      - series: 'up{app="demo-service"}'
+        values: '1x180'
+    alert_rule_test:
+      - { eval_time: 3h, alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - { eval_time: 3h, alertname: ErrorBudgetBurnSlow, exp_alerts: [] }
+      - { eval_time: 3h, alertname: NoTraffic, exp_alerts: [] }
+      - { eval_time: 3h, alertname: ServiceDown, exp_alerts: [] }
+
+  # -------------------------------------------------------------------------
+  - name: a 0.5% leak opens a ticket after a day and never pages
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx"}'
+        values: '0+1990x1560'
+      - series: 'http_requests_total{app="demo-service",status_class="5xx"}'
+        values: '0+10x1560'
+      - series: 'up{app="demo-service"}'
+        values: '1x1560'
+    alert_rule_test:
+      # 0.5% is 5x the 0.1% budget: over the 14.4x page line? No. Over the
+      # 3x ticket line? Yes, once the 1d window fills.
+      - { eval_time: 2h,  alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - { eval_time: 26h, alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - eval_time: 26h
+        alertname: ErrorBudgetBurnSlow
+        exp_alerts:
+          - exp_labels:
+              alertname: ErrorBudgetBurnSlow
+              severity: ticket
+              service: demo-service
+              slo: availability
+            exp_annotations:
+              summary: demo-service is steadily spending its availability error budget
+              description: Error ratio is 0.5% over the last day. Not urgent, but the budget will not last the month.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnSlow.md
+
+  # -------------------------------------------------------------------------
+  - name: no traffic is not an error budget burn, and has its own alert
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx"}'
+        values: '500x30'
+      - series: 'up{app="demo-service"}'
+        values: '1x30'
+    promql_expr_test:
+      # NaN, not 0. A 0 here would be a claim of perfect availability.
+      - expr: count(slo:sli_error:ratio_rate5m{slo="availability"} == 0)
+        eval_time: 20m
+        exp_samples: []
+    alert_rule_test:
+      - { eval_time: 20m, alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - { eval_time: 20m, alertname: ErrorBudgetBurnSlow, exp_alerts: [] }
+      - eval_time: 25m
+        alertname: NoTraffic
+        exp_alerts:
+          - exp_labels:
+              alertname: NoTraffic
+              severity: ticket
+              service: demo-service
+            exp_annotations:
+              summary: demo-service is up but has served no requests for 10 minutes
+              description: The pods are scraped and healthy; nothing is calling them. Either traffic is going somewhere else, or nothing is wrong and this is a quiet period that should be excluded from the SLO.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/NoTraffic.md
+
+  # -------------------------------------------------------------------------
+  - name: every scrape failing pages, and does not also raise NoTraffic
+    interval: 1m
+    input_series:
+      - series: 'up{app="demo-service",pod="a"}'
+        values: '1 1 1 0 0 0 0 0 0 0'
+      - series: 'up{app="demo-service",pod="b"}'
+        values: '1 1 1 0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 7m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels:
+              alertname: ServiceDown
+              severity: page
+              service: demo-service
+            exp_annotations:
+              summary: no demo-service target is being scraped
+              description: Every scrape of demo-service is failing, or there are no pods. The error-budget alerts cannot fire in this state because there are no requests to count, so this one has to.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ServiceDown.md
+      - { eval_time: 9m, alertname: NoTraffic, exp_alerts: [] }
+
+  - name: no targets at all also pages
+    interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels: { alertname: ServiceDown, severity: page, service: demo-service }
+            exp_annotations:
+              summary: no demo-service target is being scraped
+              description: Every scrape of demo-service is failing, or there are no pods. The error-budget alerts cannot fire in this state because there are no requests to count, so this one has to.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ServiceDown.md
+
+  # -------------------------------------------------------------------------
+  - name: slow responses burn the latency budget even with zero 5xx
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx"}'
+        values: '0+100x30'
+      - series: 'http_request_duration_seconds_bucket{app="demo-service",le="0.25"}'
+        values: '0+50x30'
+      - series: 'http_request_duration_seconds_bucket{app="demo-service",le="+Inf"}'
+        values: '0+100x30'
+      - series: 'http_request_duration_seconds_count{app="demo-service"}'
+        values: '0+100x30'
+      - series: 'up{app="demo-service"}'
+        values: '1x30'
+    promql_expr_test:
+      - expr: round(slo:sli_error:ratio_rate5m{slo="latency"}, 0.001)
+        eval_time: 6m
+        exp_samples:
+          - labels: '{service="demo-service",slo="latency"}'
+            value: 0.5
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: ErrorBudgetBurnFast
+        exp_alerts:
+          - exp_labels: { alertname: ErrorBudgetBurnFast, severity: page, service: demo-service, slo: latency }
+            exp_annotations:
+              summary: demo-service is burning its latency error budget fast
+              description: Error ratio is 50% over the last hour. At this rate the 30-day budget is gone in under two days.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnFast.md
+
+  # -------------------------------------------------------------------------
+  - name: in steady state a 4-minute burn pages in 6 minutes and is gone 4 minutes after it stops
+    # Seven hours of clean history first, so every window is a real window.
+    # This is the property the short windows exist for, and the one a live
+    # drill on a young cluster cannot show: with minutes of history, the
+    # "6h" average is that history's average and holds the page for as long
+    # as the burn is a large share of it. Here it is not: a 4-minute burn at
+    # 37.5% errors is 0.58% over six hours, under the 0.6% the 6x pair needs,
+    # so once the 5m window empties nothing holds the alert.
+    interval: 1m
+    input_series:
+      - series: 'http_requests_total{app="demo-service",status_class="2xx",version="v1"}'
+        values: '0+100x440'
+      # 60 errors/min for minutes 421..424, nothing before or after. The
+      # counter stays flat afterwards rather than vanishing.
+      - series: 'http_requests_total{app="demo-service",status_class="5xx",version="v2"}'
+        values: '0x420 60+60x3 240x16'
+      - series: 'up{app="demo-service"}'
+        values: '1x440'
+    promql_expr_test:
+      - expr: round(slo:sli_error:ratio_rate6h{slo="availability"}, 0.0001)
+        eval_time: 7h8m
+        exp_samples:
+          - labels: '{service="demo-service",slo="availability"}'
+            value: 0.0058
+    alert_rule_test:
+      - { eval_time: 7h,   alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - { eval_time: 7h4m, alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - eval_time: 7h6m
+        alertname: ErrorBudgetBurnFast
+        exp_alerts:
+          - exp_labels: { alertname: ErrorBudgetBurnFast, severity: page, service: demo-service, slo: availability }
+            exp_annotations:
+              summary: demo-service is burning its availability error budget fast
+              description: Error ratio is 3.148% over the last hour. At this rate the 30-day budget is gone in under two days.
+              runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnFast.md
+      # Burn ended at 7h4m. The 5m window is empty by 7h8m; the 1h ratio is
+      # still 3.4% but pair one needs both; the 6h ratio is 0.58%, so pair
+      # two is false. Gone.
+      - { eval_time: 7h8m,  alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      - { eval_time: 7h12m, alertname: ErrorBudgetBurnFast, exp_alerts: [] }
+      # And the slow ticket did not open for a 4-minute event.
+      - { eval_time: 7h12m, alertname: ErrorBudgetBurnSlow, exp_alerts: [] }

@@ -3,6 +3,17 @@
 # be hardcoded in the layout as well, and the two had already drifted: 09 and
 # 10 were in the menu but missing here, so they never appeared on the homepage.
 
+- id: slo-alerting
+  title: "SLOs and Alerting"
+  path: /18-slo-alerting/
+  summary: "Two SLOs, multi-window burn-rate alerts, page-or-ticket routing, a runbook per alert, and a drill that burns the budget on purpose and proves the page arrives, the redundant ticket is held, and the page clears."
+  category: Observability
+  status: live
+  featured: true
+  year: 2026
+  stack: [Prometheus, Alertmanager, promtool, PromQL, Kubernetes]
+  repo: https://github.com/tedens/devops-portfolio/tree/main/18-slo-alerting
+
 - id: supply-chain
   title: "Supply Chain Security"
   path: /17-supply-chain/

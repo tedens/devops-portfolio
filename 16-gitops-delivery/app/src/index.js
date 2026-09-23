@@ -19,27 +19,29 @@ const VERSION = process.env.BUILD_VERSION || "dev";
 const FAIL_RATE = Number(process.env.FAIL_RATE || "0");
 const PORT = Number(process.env.PORT || "8080");
 
-// Counters keyed by status class. A histogram would be nicer for latency but
-// the analysis here gates on error rate, and an unused histogram is a lie
-// about what the dashboard is watching.
+// Counters keyed by status class, and a latency histogram.
+//
+// The histogram replaced a pair of gauge quantiles. Quantiles computed in
+// the process cannot be aggregated across pods, so a fleet-wide p95 from
+// them is not a p95 of anything. Buckets can be summed, which is what the
+// latency SLO in project 18 does. It is used, which is the bar for keeping
+// a metric.
 const requests = new Map();
-const latencies = [];
+const BUCKETS = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5];
+const bucketCounts = new Array(BUCKETS.length).fill(0);
+let durationSum = 0;
+let durationCount = 0;
 
 function record(statusClass, ms) {
   const key = `${statusClass}`;
   requests.set(key, (requests.get(key) || 0) + 1);
-  latencies.push(ms);
-  if (latencies.length > 1000) latencies.shift();
-}
-
-function quantile(sorted, q) {
-  if (sorted.length === 0) return 0;
-  const i = Math.min(sorted.length - 1, Math.floor(q * sorted.length));
-  return sorted[i];
+  const s = ms / 1000;
+  for (let i = 0; i < BUCKETS.length; i++) if (s <= BUCKETS[i]) bucketCounts[i]++;
+  durationSum += s;
+  durationCount++;
 }
 
 function metrics() {
-  const sorted = [...latencies].sort((a, b) => a - b);
   const lines = [
     "# HELP http_requests_total Requests handled, by status class.",
     "# TYPE http_requests_total counter",
@@ -50,10 +52,18 @@ function metrics() {
     );
   }
   lines.push(
-    "# HELP http_request_duration_seconds Observed latency.",
-    "# TYPE http_request_duration_seconds gauge",
-    `http_request_duration_seconds{version="${VERSION}",quantile="0.5"} ${(quantile(sorted, 0.5) / 1000).toFixed(4)}`,
-    `http_request_duration_seconds{version="${VERSION}",quantile="0.95"} ${(quantile(sorted, 0.95) / 1000).toFixed(4)}`,
+    "# HELP http_request_duration_seconds Request latency.",
+    "# TYPE http_request_duration_seconds histogram"
+  );
+  for (let i = 0; i < BUCKETS.length; i++) {
+    lines.push(
+      `http_request_duration_seconds_bucket{version="${VERSION}",le="${BUCKETS[i]}"} ${bucketCounts[i]}`
+    );
+  }
+  lines.push(
+    `http_request_duration_seconds_bucket{version="${VERSION}",le="+Inf"} ${durationCount}`,
+    `http_request_duration_seconds_sum{version="${VERSION}"} ${durationSum.toFixed(6)}`,
+    `http_request_duration_seconds_count{version="${VERSION}"} ${durationCount}`,
     "# HELP build_info Version of the running build.",
     "# TYPE build_info gauge",
     `build_info{version="${VERSION}",fail_rate="${FAIL_RATE}"} 1`

@@ -1,0 +1,103 @@
+# Multi-window, multi-burn-rate alerts on the error budget.
+#
+# The budget is (1 - objective) over 30 days. A burn rate of 1 spends
+# exactly the budget in 30 days. The pairs below come from the SRE workbook:
+#
+#   page    14.4x over 1h  and 5m    2% of the month's budget gone in an hour
+#   page     6x   over 6h  and 30m   5% gone in six hours
+#   ticket   3x   over 1d  and 2h   10% gone in a day
+#   ticket   1x   over 3d  and 6h   10% gone in three days
+#
+# The short window in each pair is what makes the alert stop. Without it,
+# a one-hour outage keeps paging for the rest of the hour after it is fixed,
+# and the on-call learns to ignore the page. With it, the alert clears
+# within minutes of the error rate dropping.
+#
+# The same expressions serve both SLOs because the recording rules carry an
+# slo label and the budget is itself a series. Adding a third SLO is two
+# recording rules and a runbook, not a new alert.
+
+groups:
+  - name: slo.demo-service.alerts
+    rules:
+      - alert: ErrorBudgetBurnFast
+        expr: |
+          (
+              slo:sli_error:ratio_rate1h  > on(service, slo) group_left () (14.4 * slo:error_budget:ratio)
+            and
+              slo:sli_error:ratio_rate5m  > on(service, slo) group_left () (14.4 * slo:error_budget:ratio)
+          )
+          or
+          (
+              slo:sli_error:ratio_rate6h  > on(service, slo) group_left () (6 * slo:error_budget:ratio)
+            and
+              slo:sli_error:ratio_rate30m > on(service, slo) group_left () (6 * slo:error_budget:ratio)
+          )
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: "{{ $labels.service }} is burning its {{ $labels.slo }} error budget fast"
+          description: >-
+            Error ratio is {{ $value | humanizePercentage }} over the last hour.
+            At this rate the 30-day budget is gone in under two days.
+          runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnFast.md
+
+      - alert: ErrorBudgetBurnSlow
+        expr: |
+          (
+              slo:sli_error:ratio_rate1d > on(service, slo) group_left () (3 * slo:error_budget:ratio)
+            and
+              slo:sli_error:ratio_rate2h > on(service, slo) group_left () (3 * slo:error_budget:ratio)
+          )
+          or
+          (
+              slo:sli_error:ratio_rate3d > on(service, slo) group_left () (1 * slo:error_budget:ratio)
+            and
+              slo:sli_error:ratio_rate6h > on(service, slo) group_left () (1 * slo:error_budget:ratio)
+          )
+        for: 1h
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.service }} is steadily spending its {{ $labels.slo }} error budget"
+          description: >-
+            Error ratio is {{ $value | humanizePercentage }} over the last day.
+            Not urgent, but the budget will not last the month.
+          runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ErrorBudgetBurnSlow.md
+
+  - name: slo.demo-service.health
+    rules:
+      # The burn alerts are silent when there is no traffic, by design (NaN
+      # compares false). This is the alert that owns that case.
+      - alert: NoTraffic
+        expr: |
+          sum(rate(http_requests_total{app="demo-service"}[10m])) == 0
+          and
+          sum(up{app="demo-service"}) > 0
+        for: 10m
+        labels:
+          severity: ticket
+          service: demo-service
+        annotations:
+          summary: "demo-service is up but has served no requests for 10 minutes"
+          description: >-
+            The pods are scraped and healthy; nothing is calling them. Either
+            traffic is going somewhere else, or nothing is wrong and this is a
+            quiet period that should be excluded from the SLO.
+          runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/NoTraffic.md
+
+      - alert: ServiceDown
+        expr: |
+          (sum(up{app="demo-service"}) or vector(0)) == 0
+        for: 2m
+        labels:
+          severity: page
+          service: demo-service
+        annotations:
+          summary: "no demo-service target is being scraped"
+          description: >-
+            Every scrape of demo-service is failing, or there are no pods.
+            The error-budget alerts cannot fire in this state because there
+            are no requests to count, so this one has to.
+          runbook_url: https://github.com/tedens/devops-portfolio/blob/main/18-slo-alerting/runbooks/ServiceDown.md

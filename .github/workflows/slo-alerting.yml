@@ -1,0 +1,100 @@
+name: SLOs and alerting
+
+# Two halves. The offline half runs in seconds and catches almost everything:
+# rules parse, the unit tests pass, routing sends each severity to the right
+# receiver, every alert has a runbook and every runbook has an alert. The
+# drill half needs a cluster and proves the part promtool cannot: that a
+# broken build produces a page at a webhook, that a redundant ticket is held
+# back while it does, and that the page clears on its own afterwards.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '18-slo-alerting/**'
+      - '16-gitops-delivery/manifests/monitoring/**'
+      - '16-gitops-delivery/app/**'
+      - '.github/workflows/slo-alerting.yml'
+  pull_request:
+    paths:
+      - '18-slo-alerting/**'
+      - '.github/workflows/slo-alerting.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: Rules, routing, runbooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: promtool and amtool, pinned
+        run: |
+          PV=3.14.0; AV=0.34.1
+          curl -sSL "https://github.com/prometheus/prometheus/releases/download/v${PV}/prometheus-${PV}.linux-amd64.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin "prometheus-${PV}.linux-amd64/promtool"
+          curl -sSL "https://github.com/prometheus/alertmanager/releases/download/v${AV}/alertmanager-${AV}.linux-amd64.tar.gz" \
+            | tar -xz --strip-components=1 -C /usr/local/bin "alertmanager-${AV}.linux-amd64/amtool"
+          promtool --version | head -1; amtool --version | head -1
+
+      - name: Offline checks
+        run: 18-slo-alerting/scripts/test.sh
+
+      - name: The tests fail when the rules are broken
+        run: |
+          # A test suite that cannot fail proves nothing. Raise the page
+          # threshold to something no burn reaches and the fast-burn tests
+          # must go red.
+          cd 18-slo-alerting
+          cp rules/slo-alerts.yaml /tmp/alerts.bak
+          # Both pairs, not one. The first version raised only the 14.4x pair
+          # and the tests stayed green, correctly: with a fresh 60% burn the
+          # 6x/6h pair fires too, because a ratio of two rates over the same
+          # window is 0.6 however little of the window holds data. A mutation
+          # the alert can route around is not a mutation.
+          sed -i -e 's/(14.4 \* slo:error_budget:ratio)/(1440 \* slo:error_budget:ratio)/g' \
+                 -e 's/(6 \* slo:error_budget:ratio)/(600 \* slo:error_budget:ratio)/g' rules/slo-alerts.yaml
+          if promtool test rules tests/*.yaml >/tmp/mutated.log 2>&1; then
+            echo "tests passed against a rule that cannot fire; they are not testing the threshold"
+            exit 1
+          fi
+          grep -c FAILED /tmp/mutated.log
+          cp /tmp/alerts.bak rules/slo-alerts.yaml
+          echo "mutated rule was caught"
+
+  drill:
+    name: Burn drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: offline
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: gitops-demo
+          node_image: kindest/node:v1.31.4
+
+      - name: Project 16's stack, from the working tree
+        working-directory: 16-gitops-delivery
+        run: ./scripts/up.sh --local
+
+      - name: Install rules, Alertmanager and the sink
+        working-directory: 18-slo-alerting
+        run: ./scripts/install.sh
+
+      - name: Burn, page, hold the ticket, clear
+        working-directory: 18-slo-alerting
+        run: ./scripts/burn-drill.sh
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n monitoring logs deploy/alert-sink --tail=50 || true
+          kubectl -n monitoring logs deploy/alertmanager --tail=50 || true
+          kubectl -n monitoring exec deploy/prometheus -- wget -q -O- http://127.0.0.1:9090/api/v1/alerts || true
+          kubectl -n monitoring exec deploy/prometheus -- wget -q -O- http://127.0.0.1:9090/api/v1/rules | head -c 4000 || true
+          kubectl -n demo get pods -o wide || true

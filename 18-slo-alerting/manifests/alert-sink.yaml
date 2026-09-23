@@ -1,0 +1,89 @@
+# Where notifications land, so the drill can prove they were sent.
+#
+# A webhook receiver that logs every payload it gets, one JSON line per
+# alert, tagged with the path it arrived on (/pager or /ticket). Reading its
+# log answers "did the page go out, and to the right receiver", which a
+# Prometheus alert in state firing does not: firing means Prometheus thinks
+# so; delivered means Alertmanager routed, grouped and sent it.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-sink
+  namespace: monitoring
+data:
+  server.js: |
+    const http = require("http");
+    http.createServer((req, res) => {
+      if (req.method !== "POST") { res.writeHead(200); return res.end("alert-sink\n"); }
+      let body = "";
+      req.on("data", (c) => (body += c));
+      req.on("end", () => {
+        try {
+          const p = JSON.parse(body);
+          for (const a of p.alerts || []) {
+            console.log(JSON.stringify({
+              receiver: req.url.replace(/^\//, ""),
+              status: a.status,
+              alertname: a.labels.alertname,
+              severity: a.labels.severity,
+              service: a.labels.service,
+              slo: a.labels.slo,
+              startsAt: a.startsAt,
+              endsAt: a.endsAt,
+            }));
+          }
+        } catch (e) {
+          console.log(JSON.stringify({ receiver: req.url, error: String(e) }));
+        }
+        res.writeHead(200); res.end();
+      });
+    }).listen(8080, () => console.log(JSON.stringify({ msg: "alert-sink listening", port: 8080 })));
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-sink
+  namespace: monitoring
+  labels: { app: alert-sink }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: alert-sink }
+  template:
+    metadata:
+      labels: { app: alert-sink }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: sink
+          image: node:22-alpine
+          command: ["node", "/app/server.js"]
+          ports:
+            - { name: http, containerPort: 8080 }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+          volumeMounts:
+            - { name: app, mountPath: /app, readOnly: true }
+      volumes:
+        - name: app
+          configMap: { name: alert-sink }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-sink
+  namespace: monitoring
+spec:
+  selector: { app: alert-sink }
+  ports:
+    - { name: http, port: 8080, targetPort: http }
