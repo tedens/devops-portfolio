@@ -109,8 +109,7 @@ policy was never created, and both the signed and the unsigned pod were
 **Kyverno treats signatures and attestations differently, and only one is
 documented.** With `insecureIgnoreTlog: true` the signature path tolerates a
 missing transparency-log entry. The attestation path does not: an SBOM
-attached with `--tlog-upload=false` fails as `cosign bundle verification
-failed` regardless of policy (`verifier.go`, the `!verified` branch). So the
+attached with `--tlog-upload=false` fails as `cosign bundle verification failed` regardless of policy (`verifier.go`, the `!verified` branch). So the
 local drill uploads to the public Rekor log, same as CI. That is also the
 honest choice; a signature nobody can look up is one you take the signer's
 word for.
@@ -125,14 +124,19 @@ matches nothing an image reference ever looks like.
 `$(hostname)` in `builder.id`, and attestation payloads go to the public log,
 where they cannot be removed. It is fixed; the one entry is permanent.
 
-## What is public
+## What is public, and what is not
 
 Running `sign-local.sh` writes to rekor.sigstore.dev: a throwaway public key,
 the digest of a demo image, its registry path, an SBOM of a Node base image,
 and a provenance predicate. Entries are permanent. CI does the same with the
-workflow's OIDC identity and publishes the image to
-`ghcr.io/tedens/devops-portfolio/demo-service`, which GitHub creates private;
-Kyverno in CI reads it with a pull secret made from `GITHUB_TOKEN`.
+workflow's OIDC identity.
+
+CI publishes the image to `ghcr.io/tedens/devops-portfolio/demo-service`.
+GitHub creates that package **private**, so `verify.sh` against it works from
+CI, which has a token, and fails from anywhere else with an authentication
+error. Kyverno in CI reads it through a pull secret made from `GITHUB_TOKEN`.
+Making the package public is a setting on the package, and until it is, the
+"anyone can reach the same verdict" property holds only in principle.
 
 ## Layout
 
@@ -144,7 +148,7 @@ policy/attestors/            ci-keyless.yaml, local-key.yaml: the only thing tha
 scripts/render-policy.rb     base + attestor file -> policy for one environment
 scripts/up.sh                cluster, registry, Kyverno
 scripts/sign-local.sh        build, sign, attest, install policy
-scripts/tamper-drill.sh      five cases; --ci uses the GHCR image for case 1
+scripts/tamper-drill.sh      five cases; --ci uses the GHCR images for cases 1 and 4
 scripts/verify.sh            cosign from outside the cluster, same verdict
 workload/demo-service.yaml   what gets admitted
 ```
@@ -155,7 +159,22 @@ The local path, end to end: cluster, signing, attestations, all five drill
 cases, the Audit self-test, and `verify.sh`, with the output above. The
 compliance gate from project 15 reports zero new findings on this directory.
 
-The CI path, keyless signing to GHCR with the SLSA generator and the
-admission drill against that image, runs on push and is what the workflow
-file describes. It had not run when this file was written; the results are in
-the Actions tab, and this section will be wrong until it has.
+The CI path ran on the first push. Keyless signing to GHCR, SBOM attestation,
+the SLSA generator's provenance, and then the admission drill against that
+image on a fresh kind cluster:
+
+```
+verify.sh   signature ok; SBOM 218 packages; provenance builder:
+            https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.1.0
+case1       admitted; tag rewritten to sha256:d952013c...
+case2       refused: not signed by the builder this cluster trusts
+case3       refused: not signed by the builder this cluster trusts
+case5       refused: only images from ghcr.io/tedens/devops-portfolio/demo-service are admitted
+PASS: 4/4
+```
+
+Case 4 was skipped on that run: without a key on the runner there was
+nothing to sign a no-attestation image with. The build job now signs one
+with the workflow identity and attests nothing to it, so the next run tests
+all five. If the Actions tab shows a red run, this section is overstating
+things.

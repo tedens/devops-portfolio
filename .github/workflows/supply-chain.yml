@@ -63,6 +63,7 @@ jobs:
       id-token: write
     outputs:
       digest: ${{ steps.push.outputs.digest }}
+      nosbom_digest: ${{ steps.nosbom.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -97,6 +98,19 @@ jobs:
 
       - name: Sign (keyless, logged to Rekor)
         run: cosign sign --yes "$IMAGE@${{ steps.push.outputs.digest }}"
+
+      - name: A signed image with nothing attested, for drill case 4
+        id: nosbom
+        run: |
+          # Signed by the trusted identity, no SBOM, no provenance. The drill
+          # must refuse it: that is the one case that tests the attestation
+          # requirement on its own, with the signature requirement satisfied.
+          docker build --build-arg BUILD_VERSION="nosbom-${GITHUB_SHA::7}" --label drill=nosbom \
+            -t "$IMAGE:nosbom-${GITHUB_SHA::7}" 16-gitops-delivery/app
+          docker push "$IMAGE:nosbom-${GITHUB_SHA::7}"
+          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:nosbom-${GITHUB_SHA::7}" | cut -d@ -f2)
+          cosign sign --yes "$IMAGE@$digest"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
       - uses: anchore/sbom-action@v0.24.2
         with:
@@ -206,10 +220,11 @@ jobs:
           REG_HOST: ghcr.io/${{ github.repository }}
           REG_CLUSTER: ghcr.io/${{ github.repository }}
           KEY: ""
+          NOSBOM_IMAGE: ${{ env.IMAGE }}@${{ needs.build-sign.outputs.nosbom_digest }}
         run: |
           # Cases 2, 3 and 5 are pushed here as unsigned/mis-signed tags on
-          # the same GHCR path; case 4 is skipped without a trusted key and
-          # is covered by case 2's unsigned push.
+          # the same GHCR path. Case 4 uses the image the build job signed
+          # with the real identity and attested nothing to.
           IMAGE="$IMAGE@${{ needs.build-sign.outputs.digest }}" ./scripts/tamper-drill.sh --ci
 
       - name: Diagnostics on failure

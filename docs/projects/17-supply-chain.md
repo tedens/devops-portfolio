@@ -100,8 +100,7 @@ authority. The docs page is not.
 **Signatures and attestations are treated differently, and only one path is
 documented.** With `insecureIgnoreTlog` the signature path tolerates a
 missing transparency-log entry. The attestation path does not: an SBOM
-attached with `--tlog-upload=false` fails as `cosign bundle verification
-failed` whatever the policy says. So the local drill uploads to the public
+attached with `--tlog-upload=false` fails as `cosign bundle verification failed` whatever the policy says. So the local drill uploads to the public
 Rekor log, as CI does. That is also the honest choice: a signature nobody
 can look up is one you take the signer's word for.
 
@@ -122,6 +121,27 @@ attestations, all five drill cases, the Audit self-test, and verification
 from outside the cluster. Project 15's compliance gate reports zero new
 findings on this directory.
 
-The CI path, keyless signing to GHCR with the SLSA generator and the admission
-drill against that image, runs on every push to the project. Its status is in
-the Actions tab; a red run there means this page is overstating things.
+The CI path ran on the first push: keyless signing to GHCR, SBOM attestation,
+the SLSA generator's provenance, then the admission drill against that image
+on a fresh kind cluster.
+
+```
+verify.sh   signature ok; SBOM 218 packages
+            provenance builder: slsa-github-generator/.../generator_container_slsa3.yml@refs/tags/v2.1.0
+case1       admitted; tag rewritten to sha256:d952013c...
+case2       refused: not signed by the builder this cluster trusts
+case3       refused: not signed by the builder this cluster trusts
+case5       refused: only images from ghcr.io/tedens/devops-portfolio/demo-service are admitted
+PASS: 4/4
+```
+
+Case 4 was skipped there, since with no key on the runner there was nothing
+to sign a no-attestation image with; the build job now signs one with the
+workflow identity and attests nothing to it, so subsequent runs test all
+five.
+
+One thing does not hold yet. GitHub created the GHCR package private, so
+verifying the published image with cosign works from CI and fails with an
+authentication error from anywhere else. The "anyone can reach the same
+verdict" property is true of the design and false of the deployment until the
+package is made public.

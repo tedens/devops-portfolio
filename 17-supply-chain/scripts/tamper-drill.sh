@@ -13,10 +13,11 @@
 # to forge anything.
 #
 #   ./scripts/tamper-drill.sh            local registry, key attestor
-#   IMAGE=ghcr.io/... ./scripts/tamper-drill.sh --ci
-#                                        in CI: case 1 uses the keyless-signed
-#                                        image; cases 2-5 are built locally
-#                                        against the same registry path
+#   IMAGE=ghcr.io/...@sha256:... NOSBOM_IMAGE=ghcr.io/...@sha256:... ./scripts/tamper-drill.sh --ci
+#                                        in CI: case 1 is the keyless-signed and
+#                                        attested image, case 4 the one CI signed
+#                                        and attested nothing to; 2, 3 and 5 are
+#                                        built here against the same path
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -107,8 +108,10 @@ if [[ -f "$KEY" ]]; then
 	nosbom_digest=$(push_variant nosbom)
 	cosign sign --key "$KEY" -y "$REG_HOST/$REPO@$nosbom_digest" >/dev/null 2>&1
 	expect refused case4-no-sbom "$REG_CLUSTER/$REPO@$nosbom_digest" "signed by the trusted key, but no SBOM or provenance attached"
+elif [[ -n "${NOSBOM_IMAGE:-}" ]]; then
+	expect refused case4-no-sbom "$NOSBOM_IMAGE" "signed by the trusted CI identity, but no SBOM or provenance attached"
 else
-	echo; echo "==> case4-no-sbom skipped: no trusted key on this machine (keyless CI); CI covers it by pushing an unsigned tag"
+	echo; echo "==> case4-no-sbom skipped: no trusted key here and no NOSBOM_IMAGE given"
 fi
 
 # ---------------------------------------------------------------------------
