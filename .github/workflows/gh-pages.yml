@@ -5,6 +5,8 @@ on:
     branches: ["main"]
     paths:
       - 'docs/**'
+      - 'README.md'
+      - 'scripts/sync-readme.py'
   workflow_dispatch:
 
 permissions:
@@ -22,6 +24,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # The README project table is generated from the same projects.yaml that
+      # drives this site. It had drifted into two tables, one of them stale and
+      # missing its header row. Fail here rather than let them diverge again.
+      - name: Check README is in sync with projects.yaml
+        run: python3 scripts/sync-readme.py --check
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
