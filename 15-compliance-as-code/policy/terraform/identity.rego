@@ -4,39 +4,36 @@
 
 package terraform.identity
 
+import data.terraform.common
 import rego.v1
 
 # IMDSv2. A hop limit above 1 lets a container reach the node's credentials,
 # which turns a web application vulnerability into an AWS one.
 deny contains msg if {
-	some name
-	inst := input.resource.aws_instance[name][_]
-	opts := inst.metadata_options[_]
+	i := common.resources("aws_instance")[_]
+	opts := common.nested(i.body, "metadata_options")[_]
 	opts.http_tokens != "required"
-	msg := sprintf("HIGH aws_instance.%s allows IMDSv1. Set http_tokens = \"required\".", [name])
+	msg := sprintf("HIGH aws_instance.%s allows IMDSv1. Set http_tokens = \"required\".", [i.name])
 }
 
 deny contains msg if {
-	some name
-	inst := input.resource.aws_instance[name][_]
-	not inst.metadata_options
-	msg := sprintf("HIGH aws_instance.%s does not pin IMDSv2. Add a metadata_options block.", [name])
+	i := common.resources("aws_instance")[_]
+	not i.body.metadata_options
+	msg := sprintf("HIGH aws_instance.%s does not pin IMDSv2. Add a metadata_options block.", [i.name])
 }
 
 # A policy document with Action "*" on Resource "*" is an admin grant however
 # it is described.
 deny contains msg if {
-	some name
-	doc := input.data.aws_iam_policy_document[name][_]
-	stmt := doc.statement[_]
+	d := common.data_blocks("aws_iam_policy_document")[_]
+	stmt := common.nested(d.body, "statement")[_]
 	stmt.actions[_] == "*"
 	stmt.resources[_] == "*"
-	msg := sprintf("CRITICAL data.aws_iam_policy_document.%s grants * on *.", [name])
+	msg := sprintf("CRITICAL data.aws_iam_policy_document.%s grants * on *.", [d.name])
 }
 
 warn contains msg if {
-	some name
-	inst := input.resource.aws_instance[name][_]
-	inst.key_name
-	msg := sprintf("aws_instance.%s has an SSH key pair. Prefer SSM Session Manager, which is logged and needs no open port.", [name])
+	i := common.resources("aws_instance")[_]
+	i.body.key_name
+	msg := sprintf("aws_instance.%s has an SSH key pair. Prefer SSM Session Manager, which is logged and needs no open port.", [i.name])
 }

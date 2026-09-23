@@ -1,12 +1,12 @@
 {
-  "generated_at": "20260922T235518Z",
+  "generated_at": "20260922T235956Z",
   "repository": {
-    "commit": "e1b9935a47a1a57bd12a609bb52f1db7599337f8",
+    "commit": "c67b514fc34b505538cfd9edeac78ac618c3c380",
     "branch": "main"
   },
   "tooling": {
     "trivy": "Version: 0.74.0",
-    "conftest": "Conftest: dev",
+    "conftest": "Conftest: 0.56.0",
     "opa": "Version: 1.20.2"
   },
   "result": {
@@ -17,7 +17,7 @@
     "passed": true
   },
   "policy_tests": {
-    "total": 22,
+    "total": 30,
     "failed": 0
   },
   "controls": {

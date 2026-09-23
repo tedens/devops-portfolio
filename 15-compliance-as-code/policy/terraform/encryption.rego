@@ -2,46 +2,42 @@
 #
 # HIPAA 164.312(a)(2)(iv) treats encryption as addressable rather than
 # required, which in practice means "do it or write down why not". This
-# organisation does it, so the exception has to go in baseline/accepted.yaml
+# organisation does it, so the exception has to go in baseline/accepted.json
 # with a name and a date against it.
 
 package terraform.encryption
 
+import data.terraform.common
 import rego.v1
 
 deny contains msg if {
-	some name
-	db := input.resource.aws_db_instance[name][_]
-	not db.storage_encrypted
-	msg := sprintf("HIGH aws_db_instance.%s has no storage encryption.", [name])
+	db := common.resources("aws_db_instance")[_]
+	not db.body.storage_encrypted
+	msg := sprintf("HIGH aws_db_instance.%s has no storage encryption.", [db.name])
 }
 
 deny contains msg if {
-	some name
-	vol := input.resource.aws_ebs_volume[name][_]
-	not vol.encrypted
-	msg := sprintf("HIGH aws_ebs_volume.%s is unencrypted.", [name])
+	v := common.resources("aws_ebs_volume")[_]
+	not v.body.encrypted
+	msg := sprintf("HIGH aws_ebs_volume.%s is unencrypted.", [v.name])
 }
 
 deny contains msg if {
-	some name
-	topic := input.resource.aws_sns_topic[name][_]
-	not topic.kms_master_key_id
-	msg := sprintf("MEDIUM aws_sns_topic.%s is unencrypted. Alert payloads often quote the data that triggered them.", [name])
+	t := common.resources("aws_sns_topic")[_]
+	not t.body.kms_master_key_id
+	msg := sprintf("MEDIUM aws_sns_topic.%s is unencrypted. Alert payloads often quote the data that triggered them.", [t.name])
 }
 
 deny contains msg if {
-	some name
-	q := input.resource.aws_sqs_queue[name][_]
-	not q.sqs_managed_sse_enabled
-	not q.kms_master_key_id
-	msg := sprintf("MEDIUM aws_sqs_queue.%s is unencrypted.", [name])
+	q := common.resources("aws_sqs_queue")[_]
+	not q.body.sqs_managed_sse_enabled
+	not q.body.kms_master_key_id
+	msg := sprintf("MEDIUM aws_sqs_queue.%s is unencrypted.", [q.name])
 }
 
 deny contains msg if {
-	some name
-	inst := input.resource.aws_instance[name][_]
-	rbd := inst.root_block_device[_]
+	i := common.resources("aws_instance")[_]
+	rbd := common.nested(i.body, "root_block_device")[_]
 	not rbd.encrypted
-	msg := sprintf("HIGH aws_instance.%s has an unencrypted root volume.", [name])
+	msg := sprintf("HIGH aws_instance.%s has an unencrypted root volume.", [i.name])
 }

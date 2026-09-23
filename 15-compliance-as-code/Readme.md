@@ -155,10 +155,28 @@ exceptions from a single tool upgrade: trivy had renamed its rule identifiers.
 slugs like `aws-vpc-no-public-egress-sgr` became `AWS-0104`. Every fingerprint
 in the baseline stopped matching at once.
 
-Two changes came out of it. Rule identifiers are now normalised before
-fingerprinting, so a prefix rename cannot invalidate the baseline again. And
-the version is pinned to one that exists, in CI and locally, because a gate
-whose definition of "pass" moves on its own is not a control.
+Then the same thing happened with the other tool, and worse. Local used a
+`dev` build of conftest while CI used 0.56.0, and the two parse HCL
+differently: one returns a resource with a single block as an **object**, the
+other as an **array**. The policies assumed an array. On CI they silently
+stopped matching three real findings in the zero-trust project, and invented a
+false one against an SQS queue that is encrypted.
+
+Every unit test still passed, because the tests only ever fed the array shape.
+That is the exact failure this project claims to prevent, so the fix was
+structural rather than a patch:
+
+- All rules now go through a `common.resources()` helper that normalises both
+  shapes into a list.
+- `policy/tests/shape_test.rego` pins both shapes, several blocks of one type,
+  and several nested blocks. The original code fails those tests.
+- Rule identifiers are normalised before fingerprinting, so a prefix rename
+  cannot invalidate the baseline again.
+- Both tools are pinned, in CI and locally, because a gate whose definition of
+  "pass" moves on its own is not a control.
+
+Finding count went from 20 back to 23 once detection was restored, and the
+false positive disappeared. Tests went from 22 to 30.
 
 Worth noting what the rename fixed: the old slug for the VPC flow-log check
 was `aws-autoscaling-enable-at-rest-encryption`, which has nothing to do with

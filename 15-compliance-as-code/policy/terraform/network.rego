@@ -7,6 +7,7 @@
 
 package terraform.network
 
+import data.terraform.common
 import rego.v1
 
 # Ports that must never be reachable from outside the VPC. Reaching one of
@@ -26,59 +27,51 @@ admin_ports := {22, 3389}
 
 open_cidrs := {"0.0.0.0/0", "::/0"}
 
-security_groups[name] := sg if {
-	some name
-	sg := input.resource.aws_security_group[name][_]
-}
-
-# HIPAA 164.312(e)(1) - transmission security.
-# SOC 2 CC6.6 - boundary protection.
+# HIPAA 164.312(e)(1) transmission security, SOC 2 CC6.6 boundary protection.
 deny contains msg if {
-	some name, sg in security_groups
-	rule := sg.ingress[_]
+	sg := common.resources("aws_security_group")[_]
+	rule := common.nested(sg.body, "ingress")[_]
 	rule.cidr_blocks[_] in open_cidrs
 	port := data_ports[_]
 	rule.from_port <= port
 	rule.to_port >= port
 	msg := sprintf(
 		"CRITICAL aws_security_group.%s allows data port %d from the internet. Reference a security group instead of a CIDR.",
-		[name, port],
+		[sg.name, port],
 	)
 }
 
 # Admin ports from anywhere are how bastions become incidents. A jump host
 # should be reachable through an identity-aware proxy, not from 0.0.0.0/0.
 deny contains msg if {
-	some name, sg in security_groups
-	rule := sg.ingress[_]
+	sg := common.resources("aws_security_group")[_]
+	rule := common.nested(sg.body, "ingress")[_]
 	rule.cidr_blocks[_] in open_cidrs
 	port := admin_ports[_]
 	rule.from_port <= port
 	rule.to_port >= port
 	msg := sprintf(
 		"HIGH aws_security_group.%s allows admin port %d from the internet. Front it with an identity-aware proxy.",
-		[name, port],
+		[sg.name, port],
 	)
 }
 
-# A database that can be addressed from the internet is one credential leak
-# away from being read, regardless of the security group in front of it.
+# A database addressable from the internet is one credential leak away from
+# being read, whatever the security group in front of it says.
 deny contains msg if {
-	some name
-	db := input.resource.aws_db_instance[name][_]
-	db.publicly_accessible == true
+	db := common.resources("aws_db_instance")[_]
+	db.body.publicly_accessible == true
 	msg := sprintf(
 		"CRITICAL aws_db_instance.%s is publicly accessible. A restored snapshot holds the same data as production.",
-		[name],
+		[db.name],
 	)
 }
 
 warn contains msg if {
-	some name
-	subnet := input.resource.aws_subnet[name][_]
-	subnet.map_public_ip_on_launch == true
+	sn := common.resources("aws_subnet")[_]
+	sn.body.map_public_ip_on_launch == true
 	msg := sprintf(
 		"aws_subnet.%s assigns public IPs on launch. Anything placed here is internet-facing by default.",
-		[name],
+		[sn.name],
 	)
 }
