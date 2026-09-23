@@ -174,6 +174,13 @@ A fire drill that needs a commit per run is a fire drill nobody does. In a
 real pipeline the image tag is written to git by CI and this problem does not
 arise.
 
+One consequence is worth stating, because it is what makes the drill safe to
+run repeatedly: once sync is restored, Argo CD pulls the cluster back to
+whatever git says. The healthy drill promotes v2 out of band and a minute
+later the Rollout is on v1 again, Synced and Healthy, because git never said
+v2. The drill leaves no trace, which is the property you actually want from
+the source of truth.
+
 ## What CI does
 
 It runs the drill, not a lint. Both directions, on a kind cluster, on every
