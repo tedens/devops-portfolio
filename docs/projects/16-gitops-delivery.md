@@ -153,6 +153,27 @@ controllers fight until the rollout stalls.
 
 `ignoreDifferences` on `/spec/selector` for both Services is what stops it.
 
+## Running a drill under GitOps is not the same as running one
+
+The drill changes an image with `kubectl`. Under GitOps a deploy is a commit,
+so that is an out-of-band change and an Application with `selfHeal: true`
+reverts it. The first run against the real path did exactly that: no
+AnalysisRun was ever created, the stable ReplicaSet never moved, and the
+Rollout sat `Healthy` while the drill timed out. Argo CD was right and the
+drill was wrong.
+
+Suspending automated sync on the `demo-service` Application alone did not
+fix it, which is the app-of-apps lesson. The root Application owns
+`apps/demo-service.yaml` and also self-heals, so it wrote the `automated`
+block straight back and the child resumed reverting. Every Application has
+to be suspended, root first, and every one restored afterwards. The drill
+does that from a trap, so the failure path restores too; leaving sync off
+would be its own kind of drift.
+
+A fire drill that needs a commit per run is a fire drill nobody does. In a
+real pipeline the image tag is written to git by CI and this problem does not
+arise.
+
 ## What CI does
 
 It runs the drill, not a lint. Both directions, on a kind cluster, on every

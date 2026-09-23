@@ -45,6 +45,66 @@ current_image() {
 
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Argo CD
+#
+# Under GitOps a deploy is a commit. This drill changes the image with
+# kubectl, which is an out-of-band change, and an Application with
+# selfHeal: true reverts it. The first run against the real GitOps path did
+# exactly that: no AnalysisRun was created, the stable ReplicaSet never
+# moved, and the rollout sat Healthy while the drill timed out. Argo CD was
+# working correctly; the drill was wrong.
+#
+# Suspending the demo-service Application alone is not enough, which is the
+# app-of-apps lesson. The root Application owns apps/demo-service.yaml and
+# also self-heals, so it puts the automated block straight back and the
+# child resumes reverting. Every Application with automated sync has to be
+# suspended, root included, and every one of them restored afterwards.
+#
+# A fire drill that needs a commit per run is a fire drill nobody does.
+# Leaving sync off afterwards would be its own kind of drift, so the restore
+# runs from a trap and covers the failure path too.
+# ---------------------------------------------------------------------------
+
+suspended_apps=()
+
+restore_sync() {
+	local app
+	for app in "${suspended_apps[@]:-}"; do
+		[[ -z "$app" ]] && continue
+		kubectl -n argocd patch application "$app" --type=merge \
+			-p '{"spec":{"syncPolicy":{"automated":{"selfHeal":true,"prune":true}}}}' >/dev/null 2>&1 || true
+		echo "restored automated sync on $app"
+	done
+	suspended_apps=()
+}
+
+if kubectl -n argocd get applications >/dev/null 2>&1; then
+	# Root first. Suspending a child while the root still self-heals means
+	# the root simply writes the child's automated block back.
+	mapfile -t automated < <(
+		kubectl -n argocd get applications -o json 2>/dev/null |
+			jq -r '.items[] | select(.spec.syncPolicy.automated != null) | .metadata.name' |
+			sort --key=1,1 --stable |
+			awk '/^root$/ {print; next} {rest = rest $0 ORS} END {printf "%s", rest}'
+	)
+
+	if [[ "${#automated[@]}" -gt 0 && -n "${automated[0]:-}" ]]; then
+		log "suspending Argo CD automated sync: ${automated[*]}"
+		trap restore_sync EXIT
+		for app in "${automated[@]}"; do
+			kubectl -n argocd patch application "$app" --type=json \
+				-p '[{"op": "remove", "path": "/spec/syncPolicy/automated"}]' >/dev/null
+			suspended_apps+=("$app")
+		done
+
+		# The controller may already have a reconcile in flight against the
+		# old policy. Give it a moment before making the change it would
+		# otherwise undo.
+		sleep 5
+	fi
+fi
+
 log "before"
 before_stable=$(stable_hash)
 before_image=$(current_image)
@@ -153,12 +213,26 @@ kubectl -n "$NS" get analysisrun \
 log "is anything still serving?"
 # The question a rollback is for. If the stable pods went down with the
 # canary, the rollback worked and the outage happened anyway.
-kubectl -n "$NS" run drill-probe-$$ --rm -i --restart=Never \
+#
+# The output used to be swallowed by 2>/dev/null, so a probe that failed to
+# schedule printed nothing at all and read as a pass. Silence is the one
+# result this script must never treat as success.
+probe_out=$(kubectl -n "$NS" run "drill-probe-$$" --rm -i --restart=Never \
 	--image=curlimages/curl:8.11.1 --quiet -- \
 	sh -c 'ok=0; for i in $(seq 1 20); do
 	  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://demo-service.demo.svc.cluster.local/ || echo 000)
 	  [ "$code" = "200" ] && ok=$((ok+1))
-	done; echo "$ok/20 requests returned 200"' 2>/dev/null || true
+	done; echo "$ok/20 requests returned 200"' 2>&1) || true
+
+if [[ "$probe_out" =~ ([0-9]+)/20 ]]; then
+	echo "  ${BASH_REMATCH[0]}"
+	if [[ "${BASH_REMATCH[1]}" -lt 18 ]]; then
+		echo "  the rollback completed and the service was still degraded" >&2
+	fi
+else
+	echo "  the probe did not report; treating that as unknown, not as healthy" >&2
+	echo "  ${probe_out:-no output}" >&2
+fi
 
 # ---------------------------------------------------------------------------
 

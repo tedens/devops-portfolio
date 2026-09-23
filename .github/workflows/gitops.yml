@@ -135,7 +135,9 @@ jobs:
     # request it would sync code that is not the code under test.
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Bring-up is about six minutes and the drill another five, on a runner
+    # slower than a laptop.
+    timeout-minutes: 30
     needs: manifests
 
     steps:
@@ -180,9 +182,29 @@ jobs:
           fi
           echo "no InvalidSpec"
 
+      - name: The drill works with Argo CD managing the cluster
+        working-directory: 16-gitops-delivery
+        run: |
+          # This is the case that broke twice. selfHeal reverts the drill's
+          # out-of-band image change, and suspending the child Application is
+          # not enough because the root Application heals that too. Both
+          # times the result was a rollout that never happened.
+          ./scripts/rollback-drill.sh
+
+      - name: Automated sync was put back
+        run: |
+          # The drill suspends sync and restores it from a trap. A drill that
+          # leaves auto-sync off has disabled the thing the project is about.
+          missing=$(kubectl -n argocd get applications -o json | jq -r '
+            [.items[] | select(.spec.syncPolicy.automated == null) | .metadata.name] | join(",")')
+          [ -z "$missing" ] || { echo "automated sync still off for: $missing"; exit 1; }
+          echo "automated sync restored on every Application"
+
       - name: Diagnostics on failure
         if: failure()
         run: |
           kubectl -n argocd get applications -o yaml || true
           kubectl -n argocd logs deploy/argocd-application-controller --tail=100 || true
+          kubectl -n demo get rollout demo-service -o yaml || true
+          kubectl -n demo get analysisrun -o yaml || true
           kubectl -n demo get all || true
