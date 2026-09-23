@@ -173,8 +173,17 @@ case5       refused: only images from ghcr.io/tedens/devops-portfolio/demo-servi
 PASS: 4/4
 ```
 
-Case 4 was skipped on that run: without a key on the runner there was
+Case 4 was skipped on that first run: without a key on the runner there was
 nothing to sign a no-attestation image with. The build job now signs one
-with the workflow identity and attests nothing to it, so the next run tests
-all five. If the Actions tab shows a red run, this section is overstating
-things.
+with the workflow identity and attests nothing to it, and the second run
+refused it on the SBOM rule:
+
+```
+case4       signed by the trusted CI identity, but no SBOM or provenance attached
+            refused: image has no SBOM attestation from the trusted builder
+PASS: 5/5
+```
+
+That is the case that tests the attestation rules on their own, with the
+signature rule satisfied by the real identity. If the Actions tab shows a red
+run, this section is overstating things.

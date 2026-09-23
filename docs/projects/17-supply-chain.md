@@ -136,9 +136,10 @@ PASS: 4/4
 ```
 
 Case 4 was skipped there, since with no key on the runner there was nothing
-to sign a no-attestation image with; the build job now signs one with the
-workflow identity and attests nothing to it, so subsequent runs test all
-five.
+to sign a no-attestation image with. The build job now signs one with the
+workflow identity and attests nothing to it, and the second run refused it
+on the SBOM rule: `PASS: 5/5`. That is the case that tests the attestation
+rules on their own, with the signature rule satisfied by the real identity.
 
 One thing does not hold yet. GitHub created the GHCR package private, so
 verifying the published image with cosign works from CI and fails with an
